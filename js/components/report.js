@@ -164,7 +164,7 @@ function buildEmissionsBreakdown(emissions, percentages) {
     </div>
 
     <div class="emissions-breakdown">
-      <div class="chart-container chart-container--donut" id="emissions-donut-chart" role="img" aria-label="Donut chart showing emissions by category">
+      <div class="chart-container chart-container--bar" id="emissions-bar-chart" role="img" aria-label="Bar chart showing emissions by category">
       </div>
       <div class="emissions-legend">
         ${legendItems}
@@ -300,9 +300,9 @@ function renderEmissionsDonut(emissions, percentages) {
   }));
 
   try {
-    renderDonutChart('emissions-donut-chart', segments);
+    renderBarChart('emissions-bar-chart', segments);
   } catch (e) {
-    console.warn('Could not render donut chart:', e);
+    console.warn('Could not render bar chart:', e);
   }
 }
 

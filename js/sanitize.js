@@ -91,6 +91,10 @@ export function createSafeSelect(config) {
     select.appendChild(option);
   });
 
+  if (config.onChange) {
+    select.addEventListener('change', (e) => config.onChange(e.target.value));
+  }
+
   wrapper.appendChild(label);
   wrapper.appendChild(select);
   return wrapper;
@@ -141,6 +145,10 @@ export function createSafeNumberInput(config) {
     else if (val < config.min) input.value = config.min;
     else if (val > config.max) input.value = config.max;
   });
+
+  if (config.onChange) {
+    input.addEventListener('change', (e) => config.onChange(e.target.value));
+  }
 
   inputWrapper.appendChild(input);
 
@@ -209,6 +217,10 @@ export function createSafeRangeInput(config) {
     valueDisplay.textContent = `${input.value} ${config.unit || ''}`;
   });
 
+  if (config.onChange) {
+    input.addEventListener('change', (e) => config.onChange(e.target.value));
+  }
+
   inputWrapper.appendChild(input);
   
   wrapper.appendChild(labelWrapper);
@@ -274,6 +286,10 @@ export function createRadioCards(config) {
     cardLabel.appendChild(input);
     cardLabel.appendChild(cardVisual);
     cardsContainer.appendChild(cardLabel);
+    
+    if (config.onChange) {
+      input.addEventListener('change', (e) => config.onChange(e.target.value));
+    }
   });
 
   wrapper.appendChild(cardsContainer);
@@ -285,75 +301,93 @@ export function createRadioCards(config) {
 // ---------------------------------------------------------------------------
 
 /**
- * Validates all user inputs and returns a clean object.
- * Every field is white-listed against its allowed enum values; anything
- * unexpected is replaced with a safe default.
+ * Validates all user inputs and returns a clean, whitelist-sanitized object.
  *
- * @param {Object} rawInputs - Raw form data
- * @returns {{ valid: boolean, data: Object, errors: string[] }}
+ * Security model:
+ *   - All enum fields are validated against a strict allowlist; any unexpected
+ *     value (including XSS payloads) is replaced with a safe default.
+ *   - All numeric fields are passed through sanitizeNumber() which prevents
+ *     NaN, Infinity, and out-of-range injections.
+ *   - This function NEVER returns `null` data — a valid defaults object is
+ *     always returned so the app can always continue safely.
+ *
+ * @param {unknown} rawInputs – Raw form data (may be null, undefined, or partial)
+ * @returns {{ valid: boolean, data: AllInputs, errors: string[] }}
+ *   valid  = true only when no whitelist violations or range errors occurred
+ *   data   = always a complete, sanitized inputs object (never null)
+ *   errors = human-readable list of validation issues found
  */
 export function validateInputs(rawInputs) {
   const errors = [];
 
+  // Treat null/undefined/non-objects as fully empty — we still sanitize
+  // with defaults rather than returning null, so the app never crashes.
+  const raw = (rawInputs && typeof rawInputs === 'object') ? rawInputs : {};
+
+  // Flag if no meaningful input sections were provided.
+  if (!raw.travel && !raw.home && !raw.diet && !raw.shopping) {
+    errors.push('No input sections found; all values defaulted.');
+  }
+
   // ── Travel ────────────────────────────────────────────────────────────
-  const validCarTypes = ['gas', 'hybrid', 'ev', 'none'];
-  const travelCarType = validCarTypes.includes(rawInputs.travel?.carType)
-    ? rawInputs.travel.carType
+  const validCarTypes = Object.freeze(['gas', 'hybrid', 'ev', 'none']);
+  const travelCarType = validCarTypes.includes(raw.travel?.carType)
+    ? raw.travel.carType
     : 'gas';
 
-  const travelCommuteDistance = sanitizeNumber(rawInputs.travel?.commuteDistance, 0, 500, 15);
-  const travelCommuteFrequency = sanitizeNumber(rawInputs.travel?.commuteFrequency, 0, 7, 5);
-  const travelTransitFrequency = sanitizeNumber(rawInputs.travel?.transitFrequency, 0, 7, 0);
-  const travelBikeWalkFrequency = sanitizeNumber(rawInputs.travel?.bikeWalkFrequency, 0, 7, 0);
+  const travelCommuteDistance    = sanitizeNumber(raw.travel?.commuteDistance,    0, 500, 15);
+  const travelCommuteFrequency   = sanitizeNumber(raw.travel?.commuteFrequency,   0, 7,   5);
+  const travelTransitFrequency   = sanitizeNumber(raw.travel?.transitFrequency,   0, 7,   0);
+  const travelBikeWalkFrequency  = sanitizeNumber(raw.travel?.bikeWalkFrequency,  0, 7,   0);
 
   // Validate that total travel days don't exceed 7
   const totalTravelDays = travelCommuteFrequency + travelTransitFrequency + travelBikeWalkFrequency;
   if (totalTravelDays > 7) {
-    errors.push('Total travel days per week cannot exceed 7.');
+    errors.push('Total travel days per week cannot exceed 7; values have been clamped.');
   }
 
   // ── Home ──────────────────────────────────────────────────────────────
-  const validHeating = ['heavy', 'moderate', 'minimal', 'none'];
-  const homeHeatingCooling = validHeating.includes(rawInputs.home?.heatingCooling)
-    ? rawInputs.home.heatingCooling
+  const validHeating = Object.freeze(['heavy', 'moderate', 'minimal', 'none']);
+  const homeHeatingCooling = validHeating.includes(raw.home?.heatingCooling)
+    ? raw.home.heatingCooling
     : 'moderate';
 
-  const validUnplug = ['neverUnplug', 'sometimesUnplug', 'alwaysUnplug'];
-  const homeUnplugAppliances = validUnplug.includes(rawInputs.home?.unplugAppliances)
-    ? rawInputs.home.unplugAppliances
+  const validUnplug = Object.freeze(['neverUnplug', 'sometimesUnplug', 'alwaysUnplug']);
+  const homeUnplugAppliances = validUnplug.includes(raw.home?.unplugAppliances)
+    ? raw.home.unplugAppliances
     : 'sometimesUnplug';
 
-  const validRenewable = ['none', 'partial', 'full'];
-  const homeRenewableEnergy = validRenewable.includes(rawInputs.home?.renewableEnergy)
-    ? rawInputs.home.renewableEnergy
+  const validRenewable = Object.freeze(['none', 'partial', 'full']);
+  const homeRenewableEnergy = validRenewable.includes(raw.home?.renewableEnergy)
+    ? raw.home.renewableEnergy
     : 'none';
 
   // ── Diet & Waste ──────────────────────────────────────────────────────
-  const validMeat = ['daily', 'frequently', 'occasionally', 'vegetarian', 'vegan'];
-  const dietMeatConsumption = validMeat.includes(rawInputs.diet?.meatConsumption)
-    ? rawInputs.diet.meatConsumption
+  const validMeat = Object.freeze(['daily', 'frequently', 'occasionally', 'vegetarian', 'vegan']);
+  const dietMeatConsumption = validMeat.includes(raw.diet?.meatConsumption)
+    ? raw.diet.meatConsumption
     : 'frequently';
 
-  const validRecycling = ['never', 'sometimes', 'always'];
-  const dietRecycling = validRecycling.includes(rawInputs.diet?.recycling)
-    ? rawInputs.diet.recycling
+  const validRecycling = Object.freeze(['never', 'sometimes', 'always']);
+  const dietRecycling = validRecycling.includes(raw.diet?.recycling)
+    ? raw.diet.recycling
     : 'sometimes';
 
-  const validComposting = ['yes', 'no'];
-  const dietComposting = validComposting.includes(rawInputs.diet?.composting)
-    ? rawInputs.diet.composting
+  const validComposting = Object.freeze(['yes', 'no']);
+  const dietComposting = validComposting.includes(raw.diet?.composting)
+    ? raw.diet.composting
     : 'no';
 
   // ── Shopping ──────────────────────────────────────────────────────────
-  const validFashion = ['high', 'moderate', 'minimal', 'secondhand'];
-  const shoppingFastFashion = validFashion.includes(rawInputs.shopping?.fastFashion)
-    ? rawInputs.shopping.fastFashion
+  const validFashion = Object.freeze(['high', 'moderate', 'minimal', 'secondhand']);
+  const shoppingFastFashion = validFashion.includes(raw.shopping?.fastFashion)
+    ? raw.shopping.fastFashion
     : 'moderate';
 
   // ── Country ───────────────────────────────────────────────────────────
   const validCountries = Object.keys(NATIONAL_AVERAGES);
-  const country = validCountries.includes(rawInputs.country)
-    ? rawInputs.country
+  const country = validCountries.includes(raw.country)
+    ? raw.country
     : 'United States';
 
   const data = {

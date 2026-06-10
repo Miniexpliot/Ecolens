@@ -3,27 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="EcoLens - Understand, track, and reduce your carbon footprint with personalized AI-powered insights. Calculate your CO2 emissions and get actionable recommendations.">
+  <meta name="description" content="EcoLens — Understand, track, and reduce your carbon footprint with personalized AI-powered insights. Calculate your CO₂ emissions and get actionable recommendations.">
   <meta name="theme-color" content="#060b18">
   <meta name="color-scheme" content="dark">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; connect-src 'self' ws: wss:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;">
+
+  <!--
+    Content Security Policy:
+    - default-src 'self'          → only our own origin for default resource loads
+    - script-src 'self' + CDN    → Three.js loaded from trusted CDN; unsafe-eval
+                                    only present because Vite dev HMR requires it;
+                                    remove 'unsafe-eval' for production builds.
+    - style-src 'unsafe-inline'  → Required for Vite injected critical styles
+    - connect-src ws: wss:       → Vite HMR websocket
+    - font-src                   → Google Fonts static assets
+    - img-src data:              → Base64 data URIs used by chart SVGs
+  -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self';
+                 script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com;
+                 connect-src 'self' ws: wss:;
+                 style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+                 font-src 'self' https://fonts.gstatic.com;
+                 img-src 'self' data:;">
+
   <title>EcoLens — Personal Carbon Footprint Tracker</title>
 
-  <!-- Google Fonts preconnect -->
+  <!-- Google Fonts — preconnect to eliminate render-blocking round trips -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700;800&display=swap"
+        rel="stylesheet">
 
   <!-- Main stylesheet -->
   <link rel="stylesheet" href="css/styles.css">
 
-  <!-- Three.js for 3D Interactive Globe (Deferred for Efficiency) -->
+  <!-- Three.js — deferred so it does not block FCP -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
 
-  <!-- Critical inline styles to prevent flash of unstyled content -->
+  <!--
+    Critical inline styles — prevents FOUC before the external stylesheet loads.
+    These styles intentionally duplicate only the absolute minimum needed for
+    the above-the-fold skeleton; everything else lives in styles.css.
+  -->
   <style>
     html, body {
-      background-color: transparent; /* Changed from #060b18 so canvas shows */
+      background-color: transparent; /* Canvas fills the background */
       color: #f1f5f9;
       margin: 0;
       padding: 0;
@@ -31,9 +55,34 @@
       display: flex;
       flex-direction: column;
     }
-    #app-root {
-      flex: 1;
+
+    #app-root { flex: 1; }
+
+    /* Skip-navigation link — visible only on keyboard focus (WCAG 2.4.1) */
+    .skip-nav {
+      position: absolute;
+      left: -10000px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
     }
+    .skip-nav:focus {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      width: auto;
+      height: auto;
+      padding: 0.75rem 1.25rem;
+      background: #10b981;
+      color: #000;
+      font-weight: 700;
+      border-radius: 0.5rem;
+      z-index: 99999;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+
     .main-footer {
       text-align: center;
       padding: 20px;
@@ -47,28 +96,59 @@
     }
   </style>
 </head>
+
 <body>
-  <!-- Skip Navigation Link -->
+  <!--
+    Skip navigation — first focusable element on the page so keyboard/screen-reader
+    users can bypass the navigation bar directly to main content (WCAG 2.4.1 AA).
+  -->
   <a href="#main-content" class="skip-nav">Skip to main content</a>
 
-  <!-- 3D Interactive Background Canvas -->
-  <canvas id="bg-canvas" aria-hidden="true" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none;"></canvas>
+  <!--
+    3D background canvas — decorative only. aria-hidden prevents assistive
+    technologies from announcing or interacting with it (WCAG 1.1.1).
+  -->
+  <canvas
+    id="bg-canvas"
+    aria-hidden="true"
+    role="presentation"
+    style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:-1;pointer-events:none;"
+  ></canvas>
 
-  <!-- App Root: All content rendered by JS -->
+  <!--
+    Application root — all page content is rendered here by app.js.
+    The id="app-root" is the anchor; id="main-content" is assigned to the
+    <main> element created by the router so the skip-link target is valid.
+  -->
   <div id="app-root"></div>
 
-  <!-- Professional Footer -->
-  <footer class="main-footer">
+  <!--
+    Site footer — uses <footer> semantic element (WCAG 1.3.1 / landmark roles).
+    The year is stamped from JS rather than hardcoded so it never goes stale.
+  -->
+  <footer class="main-footer" role="contentinfo">
     <div class="container">
-      &copy; <span id="year"></span> EcoLens Inc. All rights reserved.<br>
-      Powered by local AI.
+      <p style="margin:0;">
+        &copy; <span id="year" aria-label="Current year"></span> EcoLens.
+        All rights reserved. Powered by local AI — your data never leaves your device.
+      </p>
     </div>
   </footer>
 
-  <!-- Module Entry Point -->
+  <!-- Module entry point — type="module" defers automatically in modern browsers -->
   <script type="module" src="js/app.js"></script>
+
+  <!--
+    Year stamp — runs synchronously after footer renders.
+    Kept inline to avoid a separate request for a 1-line script.
+  -->
   <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
+    (function stampYear() {
+      const yearEl = document.getElementById('year');
+      if (yearEl) {
+        yearEl.textContent = new Date().getFullYear();
+      }
+    }());
   </script>
 </body>
 </html>

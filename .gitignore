@@ -1,0 +1,24 @@
+# Dependencies — never commit to the repository
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output (Vite)
+dist/
+build/
+.vite/
+
+# OS & editor artifacts
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.env
+.env.*
+
+# IDE project files
+.idea/
+.vscode/
+*.suo
+*.user

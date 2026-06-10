@@ -6,7 +6,7 @@
 
 import { Store } from '../state.js';
 import { NATIONAL_AVERAGES } from '../constants.js';
-import { sanitizeNumber, sanitizeText, createSafeSelect, createSafeRangeInput, createRadioCards } from '../sanitize.js';
+import { sanitizeNumber, sanitizeText, createSafeSelect, createSafeRangeInput, createRadioCards, validateInputs } from '../sanitize.js';
 import { navigate } from '../router.js';
 
 /* ── Step definitions ────────────────────────────────────────── */
@@ -173,21 +173,15 @@ function renderStep1(panel, inputs) {
       name: 'carType',
       label: 'What type of car do you drive?',
       options: [
-        { value: 'gasoline', text: 'Gasoline', icon: '⛽' },
+        { value: 'gas', text: 'Gasoline', icon: '⛽' },
         { value: 'hybrid', text: 'Hybrid', icon: '⚡⛽' },
-        { value: 'electric', text: 'Electric', icon: '🔋' },
+        { value: 'ev', text: 'Electric', icon: '🔋' },
         { value: 'none', text: 'No Car', icon: '🚶' }
       ],
-      defaultValue: inputs.carType || 'gasoline',
+      defaultValue: inputs.travel?.carType || 'gas',
+      onChange: (val) => updateInput('carType', val)
     })
   ));
-  
-  // Attach event listeners for the radio cards
-  setTimeout(() => {
-    document.querySelectorAll('input[name="carType"]').forEach(radio => {
-      radio.addEventListener('change', (e) => updateInput('carType', e.target.value));
-    });
-  }, 0);
 
   // Daily commute distance
   grid.appendChild(makeFormGroup(
@@ -198,7 +192,7 @@ function renderStep1(panel, inputs) {
       min: 0,
       max: 100,
       step: 1,
-      defaultValue: inputs.commuteDistance ?? 15,
+      defaultValue: inputs.travel?.commuteDistance ?? 15,
       unit: 'miles',
       onChange: (val) => updateInput('commuteDistance', sanitizeNumber(val, 0, 500, 15))
     })
@@ -213,7 +207,7 @@ function renderStep1(panel, inputs) {
       min: 0,
       max: 7,
       step: 1,
-      defaultValue: inputs.commuteDays ?? 5,
+      defaultValue: inputs.travel?.commuteFrequency ?? 5,
       unit: 'days/wk',
       onChange: (val) => updateInput('commuteDays', sanitizeNumber(val, 0, 7, 5))
     })
@@ -228,7 +222,7 @@ function renderStep1(panel, inputs) {
       min: 0,
       max: 7,
       step: 1,
-      defaultValue: inputs.transitDays ?? 0,
+      defaultValue: inputs.travel?.transitFrequency ?? 0,
       unit: 'days/wk',
       onChange: (val) => updateInput('transitDays', sanitizeNumber(val, 0, 7, 0))
     })
@@ -243,7 +237,7 @@ function renderStep1(panel, inputs) {
       min: 0,
       max: 7,
       step: 1,
-      defaultValue: inputs.bikeDays ?? 0,
+      defaultValue: inputs.travel?.bikeWalkFrequency ?? 0,
       unit: 'days/wk',
       onChange: (val) => updateInput('bikeDays', sanitizeNumber(val, 0, 7, 0))
     })
@@ -284,9 +278,9 @@ function renderStep2(panel, inputs) {
         { value: 'heavy', text: 'Heavy', icon: '🔥❄️' },
         { value: 'moderate', text: 'Moderate', icon: '🌡️' },
         { value: 'minimal', text: 'Minimal', icon: '🧥' },
-        { value: 'off', text: 'Off/NA', icon: '🚫' }
+        { value: 'none', text: 'Off/NA', icon: '🚫' }
       ],
-      defaultValue: inputs.heatingUsage || 'moderate',
+      defaultValue: inputs.home?.heatingCooling || 'moderate',
     })
   ));
 
@@ -297,11 +291,11 @@ function renderStep2(panel, inputs) {
       name: 'unplugHabit',
       label: 'Do you unplug appliances when not in use?',
       options: [
-        { value: 'never', text: 'Never', icon: '🔌' },
-        { value: 'sometimes', text: 'Sometimes', icon: '🤔' },
-        { value: 'always', text: 'Always', icon: '✅' }
+        { value: 'neverUnplug', text: 'Never', icon: '🔌' },
+        { value: 'sometimesUnplug', text: 'Sometimes', icon: '🤔' },
+        { value: 'alwaysUnplug', text: 'Always', icon: '✅' }
       ],
-      defaultValue: inputs.unplugHabit || 'sometimes',
+      defaultValue: inputs.home?.unplugAppliances || 'sometimesUnplug',
     })
   ));
 
@@ -316,17 +310,10 @@ function renderStep2(panel, inputs) {
         { value: 'partial', text: 'Partial', icon: '🌤️' },
         { value: 'full', text: '100% Renewable', icon: '☀️' }
       ],
-      defaultValue: inputs.renewableEnergy || 'none',
+      defaultValue: inputs.home?.renewableEnergy || 'none',
+      onChange: (val) => updateInput('renewableEnergy', val)
     })
   ));
-
-  setTimeout(() => {
-    ['heatingUsage', 'unplugHabit', 'renewableEnergy'].forEach(name => {
-      document.querySelectorAll(`input[name="${name}"]`).forEach(radio => {
-        radio.addEventListener('change', (e) => updateInput(name, e.target.value));
-      });
-    });
-  }, 0);
 
   panel.appendChild(grid);
   panel.appendChild(buildNavButtons(2));
@@ -366,7 +353,8 @@ function renderStep3(panel, inputs) {
         { value: 'vegetarian', text: 'Vegetarian', icon: '🧀' },
         { value: 'vegan', text: 'Vegan', icon: '🥗' }
       ],
-      defaultValue: inputs.meatConsumption || 'frequently',
+      defaultValue: inputs.diet?.meatConsumption || 'frequently',
+      onChange: (val) => updateInput('meatConsumption', val)
     })
   ));
 
@@ -381,7 +369,8 @@ function renderStep3(panel, inputs) {
         { value: 'sometimes', text: 'Sometimes', icon: '♻️' },
         { value: 'always', text: 'Always', icon: '✅' }
       ],
-      defaultValue: inputs.recycling || 'sometimes',
+      defaultValue: inputs.diet?.recycling || 'sometimes',
+      onChange: (val) => updateInput('recycling', val)
     })
   ));
 
@@ -395,17 +384,10 @@ function renderStep3(panel, inputs) {
         { value: 'yes', text: 'Yes', icon: '🪱' },
         { value: 'no', text: 'No', icon: '🗑️' }
       ],
-      defaultValue: inputs.composting || 'no',
+      defaultValue: inputs.diet?.composting || 'no',
+      onChange: (val) => updateInput('composting', val)
     })
   ));
-
-  setTimeout(() => {
-    ['meatConsumption', 'recycling', 'composting'].forEach(name => {
-      document.querySelectorAll(`input[name="${name}"]`).forEach(radio => {
-        radio.addEventListener('change', (e) => updateInput(name, e.target.value));
-      });
-    });
-  }, 0);
 
   panel.appendChild(grid);
   panel.appendChild(buildNavButtons(3));
@@ -446,32 +428,108 @@ function renderStep4(panel, inputs) {
         { value: 'minimal', text: 'Minimal', icon: '🌿' },
         { value: 'secondhand', text: '2nd-hand', icon: '♻️' }
       ],
-      defaultValue: inputs.fastFashion || 'moderate',
+      defaultValue: inputs.shopping?.fastFashion || 'moderate',
+      onChange: (val) => updateInput('fastFashion', val)
     })
   ));
+
+  // Custom Country Modal
+  const currentCountry = inputs.country || 'United States';
+  const countryIcons = {
+    'United States': '🇺🇸', 'Canada': '🇨🇦', 'Australia': '🇦🇺',
+    'United Kingdom': '🇬🇧', 'Germany': '🇩🇪', 'France': '🇫🇷',
+    'Japan': '🇯🇵', 'China': '🇨🇳', 'India': '🇮🇳',
+    'Brazil': '🇧🇷', 'World Average': '🌍'
+  };
+
+  const countryGroup = document.createElement('div');
+  countryGroup.className = 'form-group custom-country-group';
   
-  setTimeout(() => {
-    document.querySelectorAll('input[name="fastFashion"]').forEach(radio => {
-      radio.addEventListener('change', (e) => updateInput('fastFashion', e.target.value));
+  const label = document.createElement('label');
+  label.textContent = 'Country/region for comparison';
+  countryGroup.appendChild(label);
+
+  const button = document.createElement('button');
+  button.className = 'country-selector-btn';
+  button.type = 'button';
+  button.innerHTML = `
+    <span class="country-selector-value">
+      <span class="country-icon">${countryIcons[currentCountry] || '🗺️'}</span>
+      ${currentCountry}
+    </span>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="6 9 12 15 18 9"></polyline>
+    </svg>
+  `;
+
+  // The Modal Overlay
+  const modal = document.createElement('div');
+  modal.className = 'country-modal-overlay hidden';
+  
+  const modalContent = document.createElement('div');
+  modalContent.className = 'country-modal';
+  
+  const modalHeader = document.createElement('div');
+  modalHeader.className = 'country-modal-header';
+  modalHeader.innerHTML = '<h3>Select a Country</h3>';
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'country-modal-close';
+  closeBtn.innerHTML = '&times;';
+  closeBtn.onclick = () => modal.classList.add('hidden');
+  modalHeader.appendChild(closeBtn);
+  
+  const searchInput = document.createElement('input');
+  searchInput.className = 'country-modal-search';
+  searchInput.type = 'text';
+  searchInput.placeholder = 'Search countries...';
+  
+  const optionsGrid = document.createElement('div');
+  optionsGrid.className = 'country-modal-grid';
+
+  const renderCountries = (filter = '') => {
+    optionsGrid.innerHTML = '';
+    Object.keys(NATIONAL_AVERAGES).forEach(key => {
+      if (!key.toLowerCase().includes(filter.toLowerCase())) return;
+      
+      const card = document.createElement('div');
+      card.className = `country-modal-card ${key === currentCountry ? 'selected' : ''}`;
+      card.innerHTML = `
+        <span class="cm-icon">${countryIcons[key] || '🗺️'}</span>
+        <span class="cm-name">${key}</span>
+        <span class="cm-val">${NATIONAL_AVERAGES[key]}t</span>
+      `;
+      
+      card.onclick = () => {
+        updateInput('country', key);
+        button.querySelector('.country-selector-value').innerHTML = `
+          <span class="country-icon">${countryIcons[key] || '🗺️'}</span> ${key}
+        `;
+        modal.classList.add('hidden');
+        // Update selection visually in grid
+        optionsGrid.querySelectorAll('.country-modal-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+      };
+      
+      optionsGrid.appendChild(card);
     });
-  }, 0);
+  };
 
-  // Country for comparison
-  const countryOptions = Object.keys(NATIONAL_AVERAGES).map(key => ({
-    value: key,
-    text: `${key} (${NATIONAL_AVERAGES[key]}t)`
-  }));
+  searchInput.addEventListener('input', (e) => renderCountries(e.target.value));
+  renderCountries();
 
-  grid.appendChild(makeFormGroup(
-    createSafeSelect({
-      id: 'calc-country',
-      name: 'country',
-      label: 'Country/region for comparison',
-      options: countryOptions,
-      value: inputs.country || 'US',
-      onChange: (val) => updateInput('country', val)
-    })
-  ));
+  modalContent.appendChild(modalHeader);
+  modalContent.appendChild(searchInput);
+  modalContent.appendChild(optionsGrid);
+  modal.appendChild(modalContent);
+
+  button.onclick = () => {
+    modal.classList.remove('hidden');
+    searchInput.focus();
+  };
+
+  countryGroup.appendChild(button);
+  countryGroup.appendChild(modal);
+  grid.appendChild(countryGroup);
 
   panel.appendChild(grid);
 
@@ -495,23 +553,23 @@ function buildSummaryPreview(inputs) {
       <div class="calculator__summary-group-title" style="color: var(--color-travel);">🚗 Daily Travel</div>
       <div class="calculator__summary-item">
         <span class="calculator__summary-item-label">Car Type</span>
-        <span class="calculator__summary-item-value">${formatValue(inputs.carType, { gasoline: 'Gasoline', hybrid: 'Hybrid', electric: 'Electric', none: 'No Car' })}</span>
+        <span class="calculator__summary-item-value">${formatValue(inputs.travel?.carType, { gas: 'Gasoline', hybrid: 'Hybrid', ev: 'Electric', none: 'No Car' })}</span>
       </div>
       <div class="calculator__summary-item">
         <span class="calculator__summary-item-label">Commute Distance</span>
-        <span class="calculator__summary-item-value">${inputs.commuteDistance ?? 15} miles</span>
+        <span class="calculator__summary-item-value">${inputs.travel?.commuteDistance ?? 15} miles</span>
       </div>
       <div class="calculator__summary-item">
         <span class="calculator__summary-item-label">Commute Days/Week</span>
-        <span class="calculator__summary-item-value">${inputs.commuteDays ?? 5}</span>
+        <span class="calculator__summary-item-value">${inputs.travel?.commuteFrequency ?? 5}</span>
       </div>
       <div class="calculator__summary-item">
         <span class="calculator__summary-item-label">Transit Days/Week</span>
-        <span class="calculator__summary-item-value">${inputs.transitDays ?? 0}</span>
+        <span class="calculator__summary-item-value">${inputs.travel?.transitFrequency ?? 0}</span>
       </div>
       <div class="calculator__summary-item">
         <span class="calculator__summary-item-label">Bike/Walk Days/Week</span>
-        <span class="calculator__summary-item-value">${inputs.bikeDays ?? 0}</span>
+        <span class="calculator__summary-item-value">${inputs.travel?.bikeWalkFrequency ?? 0}</span>
       </div>
     </div>
 
@@ -519,15 +577,15 @@ function buildSummaryPreview(inputs) {
       <div class="calculator__summary-group-title" style="color: var(--color-home);">🏠 Home Energy</div>
       <div class="calculator__summary-item">
         <span class="calculator__summary-item-label">Heating/Cooling</span>
-        <span class="calculator__summary-item-value">${formatValue(inputs.heatingUsage, { heavy: 'Heavy Use', moderate: 'Moderate', minimal: 'Minimal', off: 'Off / N/A' })}</span>
+        <span class="calculator__summary-item-value">${formatValue(inputs.home?.heatingCooling, { heavy: 'Heavy Use', moderate: 'Moderate', minimal: 'Minimal', none: 'Off / N/A' })}</span>
       </div>
       <div class="calculator__summary-item">
         <span class="calculator__summary-item-label">Unplug Appliances</span>
-        <span class="calculator__summary-item-value">${formatValue(inputs.unplugHabit, { never: 'Never', sometimes: 'Sometimes', always: 'Always' })}</span>
+        <span class="calculator__summary-item-value">${formatValue(inputs.home?.unplugAppliances, { neverUnplug: 'Never', sometimesUnplug: 'Sometimes', alwaysUnplug: 'Always' })}</span>
       </div>
       <div class="calculator__summary-item">
         <span class="calculator__summary-item-label">Renewable Energy</span>
-        <span class="calculator__summary-item-value">${formatValue(inputs.renewableEnergy, { none: 'None', partial: 'Partial', full: '100% Renewable' })}</span>
+        <span class="calculator__summary-item-value">${formatValue(inputs.home?.renewableEnergy, { none: 'None', partial: 'Partial', full: '100% Renewable' })}</span>
       </div>
     </div>
 
@@ -535,15 +593,15 @@ function buildSummaryPreview(inputs) {
       <div class="calculator__summary-group-title" style="color: var(--color-diet);">🥗 Diet & Waste</div>
       <div class="calculator__summary-item">
         <span class="calculator__summary-item-label">Meat Consumption</span>
-        <span class="calculator__summary-item-value">${formatValue(inputs.meatConsumption, { daily: 'Daily', frequently: 'Frequently', occasionally: 'Occasionally', vegetarian: 'Vegetarian', vegan: 'Vegan' })}</span>
+        <span class="calculator__summary-item-value">${formatValue(inputs.diet?.meatConsumption, { daily: 'Daily', frequently: 'Frequently', occasionally: 'Occasionally', vegetarian: 'Vegetarian', vegan: 'Vegan' })}</span>
       </div>
       <div class="calculator__summary-item">
         <span class="calculator__summary-item-label">Recycling</span>
-        <span class="calculator__summary-item-value">${formatValue(inputs.recycling, { never: 'Never', sometimes: 'Sometimes', always: 'Always' })}</span>
+        <span class="calculator__summary-item-value">${formatValue(inputs.diet?.recycling, { never: 'Never', sometimes: 'Sometimes', always: 'Always' })}</span>
       </div>
       <div class="calculator__summary-item">
         <span class="calculator__summary-item-label">Composting</span>
-        <span class="calculator__summary-item-value">${formatValue(inputs.composting, { yes: 'Yes', no: 'No' })}</span>
+        <span class="calculator__summary-item-value">${formatValue(inputs.diet?.composting, { yes: 'Yes', no: 'No' })}</span>
       </div>
     </div>
 
@@ -551,7 +609,7 @@ function buildSummaryPreview(inputs) {
       <div class="calculator__summary-group-title" style="color: var(--color-shopping);">🛍️ Shopping</div>
       <div class="calculator__summary-item">
         <span class="calculator__summary-item-label">Fast Fashion</span>
-        <span class="calculator__summary-item-value">${formatValue(inputs.fastFashion, { high: 'High (Monthly)', moderate: 'Moderate', minimal: 'Minimal', secondhand: 'Secondhand' })}</span>
+        <span class="calculator__summary-item-value">${formatValue(inputs.shopping?.fastFashion, { high: 'High (Monthly)', moderate: 'Moderate', minimal: 'Minimal', secondhand: 'Secondhand' })}</span>
       </div>
       <div class="calculator__summary-item">
         <span class="calculator__summary-item-label">Comparison Country</span>
@@ -614,6 +672,24 @@ function buildNavButtons(step) {
       Calculate My Footprint
     `;
     calcBtn.addEventListener('click', () => {
+      const state = Store.getState();
+      const validation = validateInputs(state.inputs);
+      if (!validation.valid && validation.errors.includes('No values found')) {
+        let errorBanner = document.getElementById('calc-error-banner');
+        if (!errorBanner) {
+          errorBanner = document.createElement('div');
+          errorBanner.id = 'calc-error-banner';
+          errorBanner.className = 'form-error';
+          errorBanner.style.padding = '10px';
+          errorBanner.style.marginBottom = '15px';
+          errorBanner.style.background = 'rgba(239, 68, 68, 0.15)';
+          errorBanner.style.border = '1px solid #ef4444';
+          errorBanner.style.borderRadius = 'var(--radius-sm)';
+          panel.insertBefore(errorBanner, panel.firstChild);
+        }
+        errorBanner.innerHTML = '<strong>Error:</strong> No values found. Please provide valid inputs before calculating.';
+        return;
+      }
       Store.generateReport();
       navigate('results');
     });
@@ -640,14 +716,53 @@ function goToStep(step) {
 
 /**
  * Update the global store with a single input change.
+ * Routes flat form keys into the correct nested state structure.
  * @param {string} key - Input key
  * @param {*} value - Updated value
  */
 function updateInput(key, value) {
+  if (value === undefined) return;
   const state = Store.getState();
-  Store.setState({
-    inputs: { ...state.inputs, [key]: value }
-  });
+  
+  const categoryMap = {
+    carType: { category: 'travel', stateKey: 'carType' },
+    commuteDistance: { category: 'travel', stateKey: 'commuteDistance' },
+    commuteDays: { category: 'travel', stateKey: 'commuteFrequency' },
+    transitDays: { category: 'travel', stateKey: 'transitFrequency' },
+    bikeDays: { category: 'travel', stateKey: 'bikeWalkFrequency' },
+    
+    heatingUsage: { category: 'home', stateKey: 'heatingCooling' },
+    unplugHabit: { category: 'home', stateKey: 'unplugAppliances' },
+    renewableEnergy: { category: 'home', stateKey: 'renewableEnergy' },
+    
+    meatConsumption: { category: 'diet', stateKey: 'meatConsumption' },
+    recycling: { category: 'diet', stateKey: 'recycling' },
+    composting: { category: 'diet', stateKey: 'composting' },
+    
+    fastFashion: { category: 'shopping', stateKey: 'fastFashion' },
+    country: { category: 'root', stateKey: 'country' }
+  };
+  
+  const mapping = categoryMap[key];
+  if (!mapping) return;
+  
+  const { category, stateKey } = mapping;
+  
+  if (category === 'root') {
+    Store.setState({
+      inputs: { ...state.inputs, [stateKey]: value }
+    });
+  } else {
+    Store.setState({
+      inputs: {
+        ...state.inputs,
+        [category]: {
+          ...state.inputs[category],
+          [stateKey]: value
+        }
+      }
+    });
+  }
 }
 
 /**

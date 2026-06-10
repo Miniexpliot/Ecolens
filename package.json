@@ -1,0 +1,25 @@
+{
+  "name": "eco-nature",
+  "version": "1.0.0",
+  "description": "**EcoLens** is a modern, highly interactive web application designed to help users understand, track, and reduce their personal carbon footprint through an intuitive multi-step calculator and local AI-powered insights.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Miniexpliot/Ecolens.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Miniexpliot/Ecolens/issues"
+  },
+  "homepage": "https://github.com/Miniexpliot/Ecolens#readme",
+  "devDependencies": {
+    "vite": "^8.0.16"
+  }
+}

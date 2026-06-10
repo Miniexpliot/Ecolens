@@ -7,87 +7,118 @@ export function renderChatWidget() {
   wrapper.className = 'chat-widget collapsed';
   
   wrapper.innerHTML = `
-    <div class="chat-widget__header" role="button" tabindex="0" aria-expanded="false">
-      <div class="chat-widget__title">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10z"></path>
-        </svg>
-        EcoLens AI
+    <button class="chat-widget__fab" aria-label="Open AI Assistant">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10z"></path>
+      </svg>
+    </button>
+    <div class="chat-widget__panel">
+      <div class="chat-widget__header">
+        <div class="chat-widget__title">
+          <span class="ai-avatar">✨</span> EcoLens AI
+        </div>
+        <button class="chat-widget__close" aria-label="Close chat">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
       </div>
-      <button class="chat-widget__toggle" aria-label="Toggle chat">
-        <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </button>
-    </div>
-    <div class="chat-widget__body">
-      <div class="chat-messages" id="chat-messages" aria-live="polite">
-        <div class="chat-message ai">Hi! I'm EcoLens AI. What would you like to know about your footprint?</div>
-      </div>
-      <div class="chat-input-area chat-suggestions">
-        <!-- Predefined questions will be generated here -->
+      <div class="chat-widget__body">
+        <div class="chat-messages" id="chat-messages" aria-live="polite">
+          <div class="chat-message ai">
+            <div class="chat-message-avatar">✨</div>
+            <div class="chat-message-bubble">Hi! I'm EcoLens AI. What would you like to know about your footprint?</div>
+          </div>
+        </div>
+        <div class="chat-input-area chat-suggestions">
+          <!-- Predefined questions will be generated here -->
+        </div>
       </div>
     </div>
   `;
 
   // Interaction logic
-  const header = wrapper.querySelector('.chat-widget__header');
+  const fab = wrapper.querySelector('.chat-widget__fab');
+  const closeBtn = wrapper.querySelector('.chat-widget__close');
   const suggestionsContainer = wrapper.querySelector('.chat-suggestions');
   const messagesContainer = wrapper.querySelector('#chat-messages');
 
-  const SUGGESTIONS = [
-    "How can I reduce my footprint?",
-    "How much does my diet contribute?",
-    "Are my travel emissions too high?",
-    "Why is my home energy so high?",
-    "Can you help me improve?"
+  let currentSuggestions = [
+    "What is a carbon footprint?",
+    "How can I reduce my daily emissions?",
+    "Why is climate change important?"
   ];
 
-  // Render suggestion buttons
-  SUGGESTIONS.forEach(q => {
-    const btn = document.createElement('button');
-    btn.className = 'chat-suggestion-btn';
-    btn.textContent = q;
-    btn.addEventListener('click', () => {
-      sendMessage(q);
+  const renderSuggestions = () => {
+    suggestionsContainer.innerHTML = '';
+    const state = Store.getState();
+    
+    // Tailor suggestions if we have a report
+    if (state.reportGenerated && state.emissions) {
+      const e = state.emissions;
+      const highest = Object.keys(e).filter(k => k !== 'total').sort((a,b) => e[b] - e[a])[0];
+      
+      currentSuggestions = [
+        `How can I reduce my ${highest} emissions?`,
+        `Am I doing better than the national average?`,
+        `What is the easiest way to save 1 ton of CO₂?`
+      ];
+    }
+
+    currentSuggestions.forEach(q => {
+      const btn = document.createElement('button');
+      btn.className = 'chat-suggestion-btn';
+      btn.textContent = q;
+      btn.addEventListener('click', () => {
+        sendMessage(q);
+      });
+      suggestionsContainer.appendChild(btn);
     });
-    suggestionsContainer.appendChild(btn);
+  };
+
+  // Re-render suggestions when store updates
+  Store.subscribe(() => {
+    renderSuggestions();
   });
+
+  // Initial render
+  renderSuggestions();
 
   const toggleChat = () => {
     wrapper.classList.toggle('collapsed');
-    const isExpanded = !wrapper.classList.contains('collapsed');
-    header.setAttribute('aria-expanded', isExpanded);
   };
 
-  header.addEventListener('click', toggleChat);
-  header.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      toggleChat();
-    }
-  });
+  fab.addEventListener('click', toggleChat);
+  closeBtn.addEventListener('click', toggleChat);
 
   const sendMessage = (text) => {
     if (!text) return;
 
-    // Sanitize user input
     const cleanText = sanitizeText(text);
-    
-    // Add User Message
     addMessage(cleanText, 'user');
 
     // Generate AI Response
-    setTimeout(() => {
+    setTimeout(async () => {
       const state = Store.getState();
-      const response = chatRespond(cleanText, state);
+      const response = await chatRespond(cleanText, state);
       addMessage(response, 'ai');
-    }, 500); // slight delay for natural feel
+    }, 500);
   };
 
   const addMessage = (text, sender) => {
     const msgEl = document.createElement('div');
     msgEl.className = `chat-message ${sender}`;
+    
+    let innerContent = '';
+    if (sender === 'ai') {
+      innerContent += '<div class="chat-message-avatar">✨</div>';
+    } else {
+      innerContent += '<div class="chat-message-avatar">👤</div>';
+    }
+
+    const bubble = document.createElement('div');
+    bubble.className = 'chat-message-bubble';
     
     // Parse basic markdown (**) to strong tags securely without innerHTML
     const parts = text.split(/(\*\*.*?\*\*)/g);
@@ -95,11 +126,14 @@ export function renderChatWidget() {
       if (part.startsWith('**') && part.endsWith('**')) {
         const strong = document.createElement('strong');
         strong.textContent = part.slice(2, -2);
-        msgEl.appendChild(strong);
+        bubble.appendChild(strong);
       } else if (part) {
-        msgEl.appendChild(document.createTextNode(part));
+        bubble.appendChild(document.createTextNode(part));
       }
     });
+
+    msgEl.innerHTML = innerContent;
+    msgEl.appendChild(bubble);
     
     messagesContainer.appendChild(msgEl);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;

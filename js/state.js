@@ -15,8 +15,10 @@ import { ACTION_ITEMS, SAFE_TARGET, NATIONAL_AVERAGES } from './constants.js';
 // Private state
 // ---------------------------------------------------------------------------
 
-/** @type {Object} Internal application state — never exposed directly. */
-let _state = {
+const STORAGE_KEY = 'ecoLensState';
+
+/** @type {Object} Default application state. */
+const defaultState = {
   currentView: 'home', // 'home' | 'climate101' | 'calculator' | 'results'
   inputs: {
     travel: {
@@ -50,6 +52,34 @@ let _state = {
   unlockedBadges: []
 };
 
+function loadState() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.checkedActions) {
+        parsed.checkedActions = new Set(parsed.checkedActions);
+      }
+      return { ...defaultState, ...parsed };
+    }
+  } catch (e) {
+    console.warn('Failed to load state from local storage', e);
+  }
+  return JSON.parse(JSON.stringify(defaultState));
+}
+
+function saveState() {
+  try {
+    const stateToSave = { ..._state, checkedActions: Array.from(_state.checkedActions) };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
+  } catch (e) {
+    console.warn('Failed to save state to local storage', e);
+  }
+}
+
+/** @type {Object} Internal application state — never exposed directly. */
+let _state = loadState();
+
 // ---------------------------------------------------------------------------
 // Memoisation cache
 // ---------------------------------------------------------------------------
@@ -71,6 +101,7 @@ const _listeners = new Set();
  * @private
  */
 function _notifyListeners() {
+  saveState();
   _listeners.forEach(fn => {
     try {
       fn({ ..._state });

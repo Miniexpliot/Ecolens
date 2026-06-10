@@ -241,7 +241,11 @@ export function renderDonutChart(containerId, segments) {
   // Filter out zero-value segments
   const validSegments = segments.filter(s => s.value > 0);
   if (validSegments.length === 0) {
-    container.innerHTML = '<p style="text-align:center;color:#94a3b8;">No emission data to display.</p>';
+    container.innerHTML = `
+      <div class="glass-card glass-card--danger" style="text-align:center; padding: 2rem;">
+        <h4 style="color:var(--color-danger); margin-bottom:0.5rem;">⚠️ Error</h4>
+        <p style="color:#94a3b8;">No values found for the chart.</p>
+      </div>`;
     return;
   }
 
@@ -435,7 +439,11 @@ export function updateDonutChart(containerId, segments) {
 
   const validSegments = segments.filter(s => s.value > 0);
   if (validSegments.length === 0) {
-    container.innerHTML = '<p style="text-align:center;color:#94a3b8;">No emission data to display.</p>';
+    container.innerHTML = `
+      <div class="glass-card glass-card--danger" style="text-align:center; padding: 2rem;">
+        <h4 style="color:var(--color-danger); margin-bottom:0.5rem;">⚠️ Error</h4>
+        <p style="color:#94a3b8;">No values found for the chart.</p>
+      </div>`;
     return;
   }
 
@@ -509,7 +517,11 @@ export function renderBarChart(containerId, bars) {
   container.classList.add('eco-chart-container');
 
   if (!bars || bars.length === 0) {
-    container.innerHTML = '<p style="text-align:center;color:#94a3b8;">No data to display.</p>';
+    container.innerHTML = `
+      <div class="glass-card glass-card--danger" style="text-align:center; padding: 2rem;">
+        <h4 style="color:var(--color-danger); margin-bottom:0.5rem;">⚠️ Error</h4>
+        <p style="color:#94a3b8;">No values found for the chart.</p>
+      </div>`;
     return;
   }
 
@@ -563,9 +575,9 @@ export function renderBarChart(containerId, bars) {
       x: labelWidth - 8,
       y: y + barHeight / 2 + 5,
       'text-anchor': 'end',
-      'font-size': '13',
-      'font-weight': '500',
-      fill: '#334155'
+      'font-size': '14',
+      'font-weight': '600',
+      fill: '#f8fafc'
     });
     label.textContent = bar.label;
     svg.appendChild(label);
@@ -577,7 +589,7 @@ export function renderBarChart(containerId, bars) {
       width: barAreaWidth,
       height: barHeight - 8,
       rx: (barHeight - 8) / 2,
-      fill: '#f1f5f9'
+      fill: 'rgba(255, 255, 255, 0.1)'
     });
     svg.appendChild(track);
 
@@ -609,9 +621,9 @@ export function renderBarChart(containerId, bars) {
       x: labelWidth + barAreaWidth + 12,
       y: y + barHeight / 2 + 5,
       'text-anchor': 'start',
-      'font-size': '14',
+      'font-size': '15',
       'font-weight': '700',
-      fill: '#0f172a'
+      fill: '#f8fafc'
     });
     value.textContent = `${bar.value.toFixed(1)}t`;
     svg.appendChild(value);
