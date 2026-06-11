@@ -95,6 +95,57 @@ export function safeSetHTML(element, html) {
   element.innerHTML = inertBody.innerHTML;
 }
 
+/**
+ * Returns a sanitized HTML string that preserves safe tags (like <strong>)
+ * but strips dangerous tags and attributes.
+ *
+ * @param {string} html - HTML string to be sanitized
+ * @returns {string} Sanitized HTML string
+ */
+export function sanitizeSafeHTML(html) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const inertBody = doc.body;
+
+  const dangerousTags = [
+    'script',
+    'iframe',
+    'object',
+    'embed',
+    'style',
+    'base',
+  ];
+
+  const walk = (node) => {
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      const tagName = node.tagName.toLowerCase();
+      if (dangerousTags.includes(tagName)) {
+        node.remove();
+        return;
+      }
+
+      const attrs = Array.from(node.attributes);
+      for (const attr of attrs) {
+        const name = attr.name.toLowerCase();
+        const value = attr.value.toLowerCase();
+        // Remove inline event handlers and javascript: URIs
+        if (name.startsWith('on') || value.includes('javascript:')) {
+          node.removeAttribute(attr.name);
+        }
+      }
+    }
+
+    // Create a static array of children to iterate over safely while removing nodes
+    const children = Array.from(node.childNodes);
+    for (const child of children) {
+      walk(child);
+    }
+  };
+
+  walk(inertBody);
+  return inertBody.innerHTML;
+}
+
 // ---------------------------------------------------------------------------
 // DOM element factories
 // ---------------------------------------------------------------------------

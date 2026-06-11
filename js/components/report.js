@@ -12,6 +12,7 @@ import { Store } from '../state.js';
 import { SAFE_TARGET, CATEGORY_COLORS, CATEGORY_LABELS } from '../constants.js';
 import { generateReport } from '../ai-engine.js';
 import { renderBarChart, renderComparisonGauge } from '../charts.js';
+import { sanitizeSafeHTML } from '../sanitize.js';
 
 /**
  * Render the full results / report section.
@@ -94,7 +95,7 @@ function buildAIPanel(report) {
 
   const insightsHTML = (report.insights || [])
     .map(
-      (insight) => `<div class="ai-panel__insight">${escapeHTML(insight)}</div>`
+      (insight) => `<div class="ai-panel__insight">${sanitizeSafeHTML(insight)}</div>`
     )
     .join('');
 
@@ -121,7 +122,7 @@ function buildAIPanel(report) {
       </div>
     </div>
 
-    <div class="ai-panel__summary">${escapeHTML(report.summary || '')}</div>
+    <div class="ai-panel__summary">${sanitizeSafeHTML(report.summary || '')}</div>
 
     ${
       insightsHTML
@@ -137,7 +138,7 @@ function buildAIPanel(report) {
         ? `
       <div class="glass-card ai-panel__savings-card">
         <h4 class="ai-panel__savings-title">💰 Savings Potential</h4>
-        <p class="ai-panel__savings-text">${escapeHTML(report.savingsText)}</p>
+        <p class="ai-panel__savings-text">${sanitizeSafeHTML(report.savingsText)}</p>
       </div>
     `
         : ''
@@ -225,7 +226,7 @@ function buildComparisonSection(report, _emissions) {
         report.vsNationalText
           ? `
         <div class="comparison-text">
-          <strong>🏳️ vs National Average:</strong> ${report.vsNationalText}
+          <strong>🏳️ vs National Average:</strong> ${sanitizeSafeHTML(report.vsNationalText)}
         </div>
       `
           : ''
@@ -234,7 +235,7 @@ function buildComparisonSection(report, _emissions) {
         report.vsTargetText
           ? `
         <div class="comparison-text">
-          <strong>🎯 vs Safe Target (${SAFE_TARGET}t):</strong> ${report.vsTargetText}
+          <strong>🎯 vs Safe Target (${SAFE_TARGET}t):</strong> ${sanitizeSafeHTML(report.vsTargetText)}
         </div>
       `
           : ''
