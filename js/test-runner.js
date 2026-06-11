@@ -63,13 +63,19 @@ export class TestRunner {
   // ── Public accessors ──────────────────────────────────────────────────────
 
   /** @returns {number} Count of registered tests. */
-  get testCount() { return this._tests.length; }
+  get testCount() {
+    return this._tests.length;
+  }
 
   /** @returns {number} Count of passing tests (only valid after run()). */
-  get passed() { return this._passed; }
+  get passed() {
+    return this._passed;
+  }
 
   /** @returns {number} Count of failing tests (only valid after run()). */
-  get failed() { return this._failed; }
+  get failed() {
+    return this._failed;
+  }
 
   // ── Test registration ─────────────────────────────────────────────────────
 
@@ -82,10 +88,14 @@ export class TestRunner {
    */
   test(name, fn) {
     if (typeof name !== 'string' || name.trim() === '') {
-      throw new TypeError('TestRunner.test: `name` must be a non-empty string.');
+      throw new TypeError(
+        'TestRunner.test: `name` must be a non-empty string.'
+      );
     }
     if (typeof fn !== 'function') {
-      throw new TypeError(`TestRunner.test: \`fn\` for "${name}" must be a function.`);
+      throw new TypeError(
+        `TestRunner.test: \`fn\` for "${name}" must be a function.`
+      );
     }
     this._tests.push({ name: name.trim(), fn });
     return this;
@@ -117,7 +127,9 @@ export class TestRunner {
   assertEqual(actual, expected, message = '') {
     if (actual !== expected) {
       const detail = message ? ` — ${message}` : '';
-      throw new Error(`assertEqual failed${detail}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+      throw new Error(
+        `assertEqual failed${detail}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`
+      );
     }
   }
 
@@ -132,8 +144,14 @@ export class TestRunner {
    * @throws {Error} When |actual − expected| > tolerance
    */
   assertClose(actual, expected, tolerance = 0.01, message = '') {
-    if (typeof actual   !== 'number') throw new TypeError(`assertClose: \`actual\` must be a number, got ${typeof actual}`);
-    if (typeof expected !== 'number') throw new TypeError(`assertClose: \`expected\` must be a number, got ${typeof expected}`);
+    if (typeof actual !== 'number')
+      throw new TypeError(
+        `assertClose: \`actual\` must be a number, got ${typeof actual}`
+      );
+    if (typeof expected !== 'number')
+      throw new TypeError(
+        `assertClose: \`expected\` must be a number, got ${typeof expected}`
+      );
     const diff = Math.abs(actual - expected);
     if (diff > tolerance) {
       const detail = message ? ` — ${message}` : '';
@@ -164,16 +182,21 @@ export class TestRunner {
 
     if (!threw) {
       const detail = message ? ` — ${message}` : '';
-      throw new Error(`assertThrows failed${detail}: expected function to throw but it did not`);
+      throw new Error(
+        `assertThrows failed${detail}: expected function to throw but it did not`
+      );
     }
 
     if (matchMsg !== undefined) {
       const errorMsg = caught?.message ?? String(caught);
-      const matches = matchMsg instanceof RegExp
-        ? matchMsg.test(errorMsg)
-        : errorMsg.includes(matchMsg);
+      const matches =
+        matchMsg instanceof RegExp
+          ? matchMsg.test(errorMsg)
+          : errorMsg.includes(matchMsg);
       if (!matches) {
-        throw new Error(`assertThrows: error message "${errorMsg}" did not match expected "${matchMsg}"`);
+        throw new Error(
+          `assertThrows: error message "${errorMsg}" did not match expected "${matchMsg}"`
+        );
       }
     }
   }
@@ -188,11 +211,16 @@ export class TestRunner {
    * @throws {Error} When structure or values differ
    */
   assertDeepEqual(actual, expected, message = '') {
-    const actualStr   = JSON.stringify(actual,   Object.keys(actual   ?? {}).sort());
-    const expectedStr = JSON.stringify(expected, Object.keys(expected ?? {}).sort());
+    const actualStr = JSON.stringify(actual, Object.keys(actual ?? {}).sort());
+    const expectedStr = JSON.stringify(
+      expected,
+      Object.keys(expected ?? {}).sort()
+    );
     if (actualStr !== expectedStr) {
       const detail = message ? ` — ${message}` : '';
-      throw new Error(`assertDeepEqual failed${detail}:\n  expected: ${expectedStr}\n  got:      ${actualStr}`);
+      throw new Error(
+        `assertDeepEqual failed${detail}:\n  expected: ${expectedStr}\n  got:      ${actualStr}`
+      );
     }
   }
 
@@ -210,11 +238,14 @@ export class TestRunner {
    * @returns {Promise<RunSummary>} Aggregated results once all tests complete
    */
   async run() {
-    this._passed  = 0;
-    this._failed  = 0;
+    this._passed = 0;
+    this._failed = 0;
     this._results = [];
 
-    console.group('%c🧪 EcoLens Test Suite', 'font-weight:bold;font-size:1.2em;color:#10b981;');
+    console.group(
+      '%c🧪 EcoLens Test Suite',
+      'font-weight:bold;font-size:1.2em;color:#10b981;'
+    );
     const suiteStart = performance.now();
 
     for (const { name, fn } of this._tests) {
@@ -234,31 +265,37 @@ export class TestRunner {
 
       if (passed) {
         this._passed++;
-        console.log(`%c✓ PASS %c${name} %c(${durationMs}ms)`,
+        console.log(
+          `%c✓ PASS %c${name} %c(${durationMs}ms)`,
           'color:#10b981;font-weight:bold;',
           'color:inherit;',
-          'color:#64748b;font-size:0.85em;');
+          'color:#64748b;font-size:0.85em;'
+        );
       } else {
         this._failed++;
-        console.error(`%c✗ FAIL %c${name}\n   %c${errorMessage}`,
+        console.error(
+          `%c✗ FAIL %c${name}\n   %c${errorMessage}`,
           'color:#ef4444;font-weight:bold;',
           'color:inherit;',
-          'color:#94a3b8;');
+          'color:#94a3b8;'
+        );
       }
 
       this._results.push({ name, passed, error: errorMessage, durationMs });
     }
 
-    const totalDurationMs = parseFloat((performance.now() - suiteStart).toFixed(2));
+    const totalDurationMs = parseFloat(
+      (performance.now() - suiteStart).toFixed(2)
+    );
     this._printSummary(totalDurationMs);
     console.groupEnd();
 
     return {
-      passed:     this._passed,
-      failed:     this._failed,
-      total:      this._tests.length,
+      passed: this._passed,
+      failed: this._failed,
+      total: this._tests.length,
       durationMs: totalDurationMs,
-      results:    [...this._results]
+      results: [...this._results],
     };
   }
 
@@ -272,7 +309,10 @@ export class TestRunner {
    */
   _printSummary(totalDurationMs) {
     console.log(`%c${'─'.repeat(50)}`, 'color:#334155;');
-    console.log(`%cCompleted in ${totalDurationMs}ms`, 'font-style:italic;color:#94a3b8;');
+    console.log(
+      `%cCompleted in ${totalDurationMs}ms`,
+      'font-style:italic;color:#94a3b8;'
+    );
 
     if (this._failed === 0) {
       console.log(
@@ -282,7 +322,7 @@ export class TestRunner {
     } else {
       console.log(
         `%c⚠️  ${this._passed} passed · ${this._failed} failed ` +
-        `(${Math.round((this._passed / this._tests.length) * 100)}%)`,
+          `(${Math.round((this._passed / this._tests.length) * 100)}%)`,
         'color:#f59e0b;font-weight:bold;font-size:1.1em;'
       );
     }

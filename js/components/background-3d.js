@@ -1,4 +1,8 @@
 /**
+ * @fileoverview EcoLens application module: background-3d.js
+ * Follows strict Google JavaScript Style Guide.
+ */
+/**
  * Three.js Interactive Green Globe Background
  * Renders a glowing, wireframe-style earth that follows the cursor.
  */
@@ -18,10 +22,19 @@ export function init3DBackground() {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x060b18); // Match var(--color-bg)
 
-  const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+  const camera = new THREE.PerspectiveCamera(
+    45,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+  );
   camera.position.z = 250;
 
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  const renderer = new THREE.WebGLRenderer({
+    canvas,
+    antialias: true,
+    alpha: true,
+  });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
@@ -46,7 +59,7 @@ export function init3DBackground() {
     color: 0x10b981, // Emerald green
     wireframe: true,
     transparent: true,
-    opacity: 0.15
+    opacity: 0.15,
   });
   const wireMesh = new THREE.Mesh(wireGeometry, wireMaterial);
   globeGroup.add(wireMesh);
@@ -58,22 +71,25 @@ export function init3DBackground() {
 
   for (let i = 0; i < particlesCount * 3; i += 3) {
     // Generate random points on sphere surface
-    const phi = Math.acos( -1 + ( 2 * i / 3 ) / particlesCount );
-    const theta = Math.sqrt( particlesCount * Math.PI ) * phi;
+    const phi = Math.acos(-1 + (2 * i) / 3 / particlesCount);
+    const theta = Math.sqrt(particlesCount * Math.PI) * phi;
 
     const r = 83 + Math.random() * 2; // slightly above surface
     posArray[i] = r * Math.cos(theta) * Math.sin(phi);
-    posArray[i+1] = r * Math.sin(theta) * Math.sin(phi);
-    posArray[i+2] = r * Math.cos(phi);
+    posArray[i + 1] = r * Math.sin(theta) * Math.sin(phi);
+    posArray[i + 2] = r * Math.cos(phi);
   }
 
-  particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+  particlesGeometry.setAttribute(
+    'position',
+    new THREE.BufferAttribute(posArray, 3)
+  );
   const particlesMaterial = new THREE.PointsMaterial({
     size: 1.5,
     color: 0x06b6d4, // Cyan highlights
     transparent: true,
     opacity: 0.8,
-    blending: THREE.AdditiveBlending
+    blending: THREE.AdditiveBlending,
   });
 
   const particleMesh = new THREE.Points(particlesGeometry, particlesMaterial);
@@ -90,7 +106,7 @@ export function init3DBackground() {
   // Positioning
   globeGroup.position.x = window.innerWidth > 768 ? 80 : 0; // Shift right on desktop
   globeGroup.position.y = -20;
-  
+
   // Mouse interaction
   let mouseX = 0;
   let mouseY = 0;
@@ -98,8 +114,8 @@ export function init3DBackground() {
   let targetY = 0;
 
   window.addEventListener('mousemove', (event) => {
-    mouseX = (event.clientX - window.innerWidth / 2);
-    mouseY = (event.clientY - window.innerHeight / 2);
+    mouseX = event.clientX - window.innerWidth / 2;
+    mouseY = event.clientY - window.innerHeight / 2;
   });
 
   // Handle Resize
@@ -120,7 +136,7 @@ export function init3DBackground() {
 
     // Constant slow rotation
     globeGroup.rotation.y = elapsedTime * 0.05;
-    
+
     // Wireframe rotates slightly differently
     wireMesh.rotation.y = elapsedTime * -0.02;
     wireMesh.rotation.x = elapsedTime * 0.01;
@@ -130,7 +146,7 @@ export function init3DBackground() {
     targetY = mouseY * 0.0005;
 
     globeGroup.rotation.x += 0.05 * (targetY - globeGroup.rotation.x);
-    globeGroup.position.z += 0.05 * ((targetX * -50) - globeGroup.position.z);
+    globeGroup.position.z += 0.05 * (targetX * -50 - globeGroup.position.z);
 
     renderer.render(scene, camera);
   }

@@ -1,4 +1,8 @@
 /**
+ * @fileoverview EcoLens application module: action-plan.js
+ * Follows strict Google JavaScript Style Guide.
+ */
+/**
  * EcoLens — Action Plan Component
  * Interactive checklist of personalized actions grouped by category.
  * Toggling actions updates the Store in real-time, which cascades
@@ -7,7 +11,6 @@
 
 import { Store } from '../state.js';
 import { CATEGORY_COLORS, CATEGORY_LABELS } from '../constants.js';
-
 
 /**
  * Render the interactive action plan.
@@ -30,12 +33,15 @@ export function renderActionPlan() {
   header.className = 'action-plan__header';
   header.innerHTML = `
     <h2>Your Personalized Action Plan</h2>
-    <p style="color: var(--text-secondary);">Check items to see real-time impact on your carbon footprint.</p>
+    <p class="action-plan__header-desc">Check items to see real-time impact on your carbon footprint.</p>
   `;
   container.appendChild(header);
 
   // Summary metrics
-  const totalPotential = relevantActions.reduce((sum, a) => sum + (a.savingsTons || 0), 0);
+  const totalPotential = relevantActions.reduce(
+    (sum, a) => sum + (a.savingsTons || 0),
+    0
+  );
   const metrics = document.createElement('div');
   metrics.className = 'action-plan__metrics';
   metrics.setAttribute('data-action-metrics', 'true');
@@ -61,7 +67,7 @@ export function renderActionPlan() {
 
   // Render each category
   const categoryOrder = ['travel', 'home', 'diet', 'shopping'];
-  categoryOrder.forEach(catKey => {
+  categoryOrder.forEach((catKey) => {
     const actions = grouped[catKey];
     if (!actions || actions.length === 0) return;
 
@@ -77,8 +83,10 @@ export function renderActionPlan() {
     catSection.appendChild(catHeader);
 
     // Render each action card
-    actions.forEach(action => {
-      catSection.appendChild(buildActionCard(action, checkedActions.has(action.id)));
+    actions.forEach((action) => {
+      catSection.appendChild(
+        buildActionCard(action, checkedActions.has(action.id))
+      );
     });
 
     container.appendChild(catSection);
@@ -87,11 +95,9 @@ export function renderActionPlan() {
   // If no actions available
   if (relevantActions.length === 0) {
     const empty = document.createElement('div');
-    empty.className = 'glass-card glass-card--static';
-    empty.style.textAlign = 'center';
-    empty.style.padding = 'var(--space-2xl)';
+    empty.className = 'glass-card glass-card--static action-plan-empty-card';
     empty.innerHTML = `
-      <p style="color: var(--text-muted);">No specific actions are available based on your current inputs. Try adjusting your calculator answers to see personalized recommendations.</p>
+      <p class="action-plan-empty-text">No specific actions are available based on your current inputs. Try adjusting your calculator answers to see personalized recommendations.</p>
     `;
     container.appendChild(empty);
   }
@@ -151,7 +157,7 @@ function buildActionCard(action, isChecked) {
 
 function groupByCategory(actions) {
   const groups = {};
-  actions.forEach(action => {
+  actions.forEach((action) => {
     const cat = action.category || 'other';
     if (!groups[cat]) groups[cat] = [];
     groups[cat].push(action);
@@ -168,5 +174,10 @@ function escapeHTML(str) {
 
 function escapeAttr(str) {
   if (!str) return '';
-  return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }

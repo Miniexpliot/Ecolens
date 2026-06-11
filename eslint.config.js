@@ -1,6 +1,9 @@
 import js from "@eslint/js";
 
 export default [
+  {
+    ignores: ["scratch/**", "coverage/**"]
+  },
   js.configs.recommended,
   {
     languageOptions: {

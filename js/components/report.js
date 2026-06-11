@@ -1,4 +1,8 @@
 /**
+ * @fileoverview EcoLens application module: report.js
+ * Follows strict Google JavaScript Style Guide.
+ */
+/**
  * EcoLens — Report / Results Component
  * Displays the AI-generated report, emissions breakdown with charts,
  * comparison gauge, and a live-updating projected score.
@@ -15,7 +19,8 @@ import { renderBarChart, renderComparisonGauge } from '../charts.js';
  */
 export function renderReport() {
   const state = Store.getState();
-  const { emissions, inputs, percentages, totalSavings, projectedScore } = state;
+  const { emissions, inputs, percentages, totalSavings, projectedScore } =
+    state;
 
   // Generate report data from the AI engine
   const report = generateReport(emissions, inputs);
@@ -39,7 +44,7 @@ export function renderReport() {
       Results
     </div>
     <h2>Your Carbon Footprint Report</h2>
-    <p style="color: var(--text-secondary);">Here's your personalized analysis based on your daily habits.</p>
+    <p class="report-header-desc">Here's your personalized analysis based on your daily habits.</p>
   `;
   container.appendChild(header);
 
@@ -57,7 +62,9 @@ export function renderReport() {
   grid.appendChild(buildComparisonSection(report, emissions));
 
   // ─── 4. Projected Score ────────────────────────────────────
-  grid.appendChild(buildProjectedScore(emissions, totalSavings, projectedScore));
+  grid.appendChild(
+    buildProjectedScore(emissions, totalSavings, projectedScore)
+  );
 
   // ─── 5. Unlocked Badges ────────────────────────────────────
   if (state.unlockedBadges && state.unlockedBadges.length > 0) {
@@ -85,9 +92,11 @@ function buildAIPanel(report) {
   card.setAttribute('role', 'region');
   card.setAttribute('aria-label', 'AI Assistant analysis');
 
-  const insightsHTML = (report.insights || []).map(
-    insight => `<div class="ai-panel__insight">${escapeHTML(insight)}</div>`
-  ).join('');
+  const insightsHTML = (report.insights || [])
+    .map(
+      (insight) => `<div class="ai-panel__insight">${escapeHTML(insight)}</div>`
+    )
+    .join('');
 
   card.innerHTML = `
     <div class="ai-panel__header">
@@ -105,7 +114,7 @@ function buildAIPanel(report) {
         <div class="ai-panel__title">EcoLens AI Assistant</div>
         <div class="ai-panel__subtitle">Personalized carbon analysis</div>
       </div>
-      <div style="margin-left: auto;">
+      <div class="ai-panel__header-rating">
         <span class="rating-badge rating-badge--${report.ratingClass || 'average'}">
           ${report.ratingEmoji || '📊'} ${escapeHTML(report.rating || 'Average')}
         </span>
@@ -114,17 +123,25 @@ function buildAIPanel(report) {
 
     <div class="ai-panel__summary">${escapeHTML(report.summary || '')}</div>
 
-    ${insightsHTML ? `
-      <h4 style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 0.05em;">Key Insights</h4>
+    ${
+      insightsHTML
+        ? `
+      <h4 class="ai-panel__insights-title">Key Insights</h4>
       <div class="ai-panel__insights">${insightsHTML}</div>
-    ` : ''}
+    `
+        : ''
+    }
 
-    ${report.savingsText ? `
-      <div class="glass-card" style="margin-top: var(--space-md); background: rgba(16,185,129,0.05); border-color: rgba(16,185,129,0.15);">
-        <h4 style="color: var(--color-primary); font-size: 0.9rem; margin-bottom: var(--space-sm);">💰 Savings Potential</h4>
-        <p style="font-size: 0.9rem; line-height: 1.6;">${escapeHTML(report.savingsText)}</p>
+    ${
+      report.savingsText
+        ? `
+      <div class="glass-card ai-panel__savings-card">
+        <h4 class="ai-panel__savings-title">💰 Savings Potential</h4>
+        <p class="ai-panel__savings-text">${escapeHTML(report.savingsText)}</p>
       </div>
-    ` : ''}
+    `
+        : ''
+    }
   `;
 
   return card;
@@ -139,23 +156,35 @@ function buildEmissionsBreakdown(emissions, percentages) {
   card.setAttribute('aria-label', 'Emissions breakdown by category');
 
   const categories = [
-    { key: 'travel', label: CATEGORY_LABELS.travel, color: CATEGORY_COLORS.travel },
+    {
+      key: 'travel',
+      label: CATEGORY_LABELS.travel,
+      color: CATEGORY_COLORS.travel,
+    },
     { key: 'home', label: CATEGORY_LABELS.home, color: CATEGORY_COLORS.home },
     { key: 'diet', label: CATEGORY_LABELS.diet, color: CATEGORY_COLORS.diet },
-    { key: 'shopping', label: CATEGORY_LABELS.shopping, color: CATEGORY_COLORS.shopping }
+    {
+      key: 'shopping',
+      label: CATEGORY_LABELS.shopping,
+      color: CATEGORY_COLORS.shopping,
+    },
   ];
 
-  const legendItems = categories.map(cat => `
+  const legendItems = categories
+    .map(
+      (cat) => `
     <div class="emissions-legend__item">
       <div class="emissions-legend__color" style="background: ${cat.color};"></div>
       <span class="emissions-legend__label">${cat.label}</span>
       <span class="emissions-legend__value">${(emissions[cat.key] || 0).toFixed(2)}t</span>
       <span class="emissions-legend__pct">${(percentages[cat.key] || 0).toFixed(0)}%</span>
     </div>
-  `).join('');
+  `
+    )
+    .join('');
 
   card.innerHTML = `
-    <h3 style="margin-bottom: var(--space-lg); font-size: 1.1rem;">Emissions Breakdown</h3>
+    <h3 class="report-card-title">Emissions Breakdown</h3>
 
     <div class="emissions-total">
       <div class="emissions-total__value">${(emissions.total || 0).toFixed(2)}</div>
@@ -180,25 +209,36 @@ function buildComparisonSection(report, _emissions) {
   const card = document.createElement('div');
   card.className = 'glass-card glass-card--static';
   card.setAttribute('role', 'region');
-  card.setAttribute('aria-label', 'Comparison with national average and safe target');
+  card.setAttribute(
+    'aria-label',
+    'Comparison with national average and safe target'
+  );
 
   card.innerHTML = `
-    <h3 style="margin-bottom: var(--space-lg); font-size: 1.1rem;">How You Compare</h3>
+    <h3 class="report-card-title">How You Compare</h3>
 
     <div class="chart-container chart-container--gauge" id="comparison-gauge-chart" role="img" aria-label="Gauge comparing your emissions to national average and safe target">
     </div>
 
-    <div class="comparison-section" style="margin-top: var(--space-lg);">
-      ${report.vsNationalText ? `
+    <div class="comparison-section-details">
+      ${
+        report.vsNationalText
+          ? `
         <div class="comparison-text">
           <strong>🏳️ vs National Average:</strong> ${report.vsNationalText}
         </div>
-      ` : ''}
-      ${report.vsTargetText ? `
+      `
+          : ''
+      }
+      ${
+        report.vsTargetText
+          ? `
         <div class="comparison-text">
           <strong>🎯 vs Safe Target (${SAFE_TARGET}t):</strong> ${report.vsTargetText}
         </div>
-      ` : ''}
+      `
+          : ''
+      }
     </div>
   `;
 
@@ -211,14 +251,17 @@ function buildProjectedScore(emissions, totalSavings, projectedScore) {
   const card = document.createElement('div');
   card.className = 'glass-card glass-card--static';
   card.setAttribute('role', 'region');
-  card.setAttribute('aria-label', 'Projected carbon footprint after taking actions');
+  card.setAttribute(
+    'aria-label',
+    'Projected carbon footprint after taking actions'
+  );
   card.setAttribute('data-projected-score', 'true');
 
   const isSafe = projectedScore <= SAFE_TARGET;
 
   card.innerHTML = `
-    <h3 style="margin-bottom: var(--space-lg); font-size: 1.1rem;">Projected Impact</h3>
-    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: var(--space-lg);">
+    <h3 class="report-card-title">Projected Impact</h3>
+    <p class="projected-score-desc">
       Check actions in your Action Plan below to see this update in real-time.
     </p>
 
@@ -240,15 +283,19 @@ function buildProjectedScore(emissions, totalSavings, projectedScore) {
       </div>
     </div>
 
-    ${isSafe ? `
+    ${
+      isSafe
+        ? `
       <div style="text-align: center; margin-top: var(--space-lg);">
         <span class="pill pill--primary">🎉 Within safe target!</span>
       </div>
-    ` : `
+    `
+        : `
       <div style="text-align: center; margin-top: var(--space-lg);">
         <span class="pill pill--amber">⚡ Check more actions to reach the ${SAFE_TARGET}t target</span>
       </div>
-    `}
+    `
+    }
   `;
 
   return card;
@@ -260,8 +307,10 @@ function buildBadgesSection(badges) {
   const card = document.createElement('div');
   card.className = 'glass-card glass-card--static badges-section';
   card.style.gridColumn = '1 / -1'; // span full width
-  
-  const badgesHTML = badges.map(b => `
+
+  const badgesHTML = badges
+    .map(
+      (b) => `
     <div class="badge-item">
       <div class="badge-icon">${b.icon}</div>
       <div class="badge-info">
@@ -269,7 +318,9 @@ function buildBadgesSection(badges) {
         <div class="badge-desc">${b.description}</div>
       </div>
     </div>
-  `).join('');
+  `
+    )
+    .join('');
 
   card.innerHTML = `
     <h3 style="margin-bottom: var(--space-md); font-size: 1.1rem; color: var(--color-primary);">🏆 Unlocked Achievements</h3>
@@ -285,17 +336,25 @@ function buildBadgesSection(badges) {
 
 function renderEmissionsDonut(emissions, percentages) {
   const categories = [
-    { key: 'travel', label: CATEGORY_LABELS.travel, color: CATEGORY_COLORS.travel },
+    {
+      key: 'travel',
+      label: CATEGORY_LABELS.travel,
+      color: CATEGORY_COLORS.travel,
+    },
     { key: 'home', label: CATEGORY_LABELS.home, color: CATEGORY_COLORS.home },
     { key: 'diet', label: CATEGORY_LABELS.diet, color: CATEGORY_COLORS.diet },
-    { key: 'shopping', label: CATEGORY_LABELS.shopping, color: CATEGORY_COLORS.shopping }
+    {
+      key: 'shopping',
+      label: CATEGORY_LABELS.shopping,
+      color: CATEGORY_COLORS.shopping,
+    },
   ];
 
-  const segments = categories.map(cat => ({
+  const segments = categories.map((cat) => ({
     label: cat.label,
     value: emissions[cat.key] || 0,
     color: cat.color,
-    percentage: percentages[cat.key] || 0
+    percentage: percentages[cat.key] || 0,
   }));
 
   try {
@@ -309,7 +368,12 @@ function renderComparisonGaugeChart(emissions, _inputs) {
   const nationalAvg = Store.getNationalAverage();
 
   try {
-    renderComparisonGauge('comparison-gauge-chart', emissions.total || 0, nationalAvg, SAFE_TARGET);
+    renderComparisonGauge(
+      'comparison-gauge-chart',
+      emissions.total || 0,
+      nationalAvg,
+      SAFE_TARGET
+    );
   } catch (e) {
     console.warn('Could not render comparison gauge:', e);
   }

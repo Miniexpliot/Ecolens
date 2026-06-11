@@ -1,4 +1,8 @@
 /**
+ * @fileoverview EcoLens application module: debug-panel.js
+ * Follows strict Google JavaScript Style Guide.
+ */
+/**
  * EcoLens — Debug Panel Component
  * Engineering debug overlay toggled with Ctrl+Shift+D.
  * Shows live state, emissions breakdown, performance metrics,
@@ -77,39 +81,42 @@ export function renderDebugPanel() {
   });
 
   // Run tests button
-  panel.querySelector('#debug-run-tests').addEventListener('click', async () => {
-    const output = panel.querySelector('#debug-test-output');
-    const section = panel.querySelector('#debug-test-results');
-    section.style.display = 'block';
-    output.textContent = 'Running tests…';
+  panel
+    .querySelector('#debug-run-tests')
+    .addEventListener('click', async () => {
+      const output = panel.querySelector('#debug-test-output');
+      const section = panel.querySelector('#debug-test-results');
+      section.style.display = 'block';
+      output.textContent = 'Running tests…';
 
-    try {
-      const testModule = await import('../tests.js');
-      if (typeof testModule.runAllTests === 'function') {
-        const results = await testModule.runAllTests();
-        if (results) {
-          const total = (results.passed || 0) + (results.failed || 0);
-          let resultText = `Tests: ${results.passed}/${total} passed\n\n`;
-          if (results.details && Array.isArray(results.details)) {
-            results.details.forEach(d => {
-              const icon = d.passed ? '✅' : '❌';
-              resultText += `${icon} ${d.name}\n`;
-              if (!d.passed && d.error) {
-                resultText += `   Error: ${d.error}\n`;
-              }
-            });
+      try {
+        const testModule = await import('../tests.js');
+        if (typeof testModule.runAllTests === 'function') {
+          const results = await testModule.runAllTests();
+          if (results) {
+            const total = (results.passed || 0) + (results.failed || 0);
+            let resultText = `Tests: ${results.passed}/${total} passed\n\n`;
+            if (results.details && Array.isArray(results.details)) {
+              results.details.forEach((d) => {
+                const icon = d.passed ? '✅' : '❌';
+                resultText += `${icon} ${d.name}\n`;
+                if (!d.passed && d.error) {
+                  resultText += `   Error: ${d.error}\n`;
+                }
+              });
+            }
+            output.textContent = resultText;
+          } else {
+            output.textContent =
+              'Tests completed (no structured results returned).';
           }
-          output.textContent = resultText;
         } else {
-          output.textContent = 'Tests completed (no structured results returned).';
+          output.textContent = 'Error: tests.js does not export runAllTests()';
         }
-      } else {
-        output.textContent = 'Error: tests.js does not export runAllTests()';
+      } catch (err) {
+        output.textContent = `Error loading tests: ${err.message}`;
       }
-    } catch (err) {
-      output.textContent = `Error loading tests: ${err.message}`;
-    }
-  });
+    });
 
   // Reset state button
   panel.querySelector('#debug-reset').addEventListener('click', () => {
@@ -180,7 +187,7 @@ function refreshDebugData(panel, updateCount) {
       reportGenerated: state.reportGenerated,
       totalSavings: state.totalSavings,
       projectedScore: state.projectedScore,
-      checkedActions: Array.from(state.checkedActions || [])
+      checkedActions: Array.from(state.checkedActions || []),
     };
     stateEl.textContent = JSON.stringify(displayState, null, 2);
   }
@@ -202,12 +209,12 @@ function refreshDebugData(panel, updateCount) {
   if (actionsEl) {
     try {
       const actions = Store.getRelevantActions();
-      const actionData = actions.map(a => ({
+      const actionData = actions.map((a) => ({
         id: a.id,
         title: a.title,
         category: a.category,
         savingsTons: a.savingsTons ? a.savingsTons.toFixed(3) : '0',
-        checked: state.checkedActions.has(a.id)
+        checked: state.checkedActions.has(a.id),
       }));
       actionsEl.textContent = JSON.stringify(actionData, null, 2);
     } catch (e) {

@@ -1,3 +1,7 @@
+/**
+ * @fileoverview EcoLens application module: chat-widget.js
+ * Follows strict Google JavaScript Style Guide.
+ */
 import { Store } from '../state.js';
 import { chatRespond } from '../ai-engine.js';
 import { sanitizeText } from '../sanitize.js';
@@ -5,7 +9,7 @@ import { sanitizeText } from '../sanitize.js';
 export function renderChatWidget() {
   const wrapper = document.createElement('div');
   wrapper.className = 'chat-widget collapsed';
-  
+
   wrapper.innerHTML = `
     <button class="chat-widget__fab" aria-label="Open AI Assistant">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -45,28 +49,30 @@ export function renderChatWidget() {
   const messagesContainer = wrapper.querySelector('#chat-messages');
 
   let currentSuggestions = [
-    "What is a carbon footprint?",
-    "How can I reduce my daily emissions?",
-    "Why is climate change important?"
+    'What is a carbon footprint?',
+    'How can I reduce my daily emissions?',
+    'Why is climate change important?',
   ];
 
   const renderSuggestions = () => {
     suggestionsContainer.innerHTML = '';
     const state = Store.getState();
-    
+
     // Tailor suggestions if we have a report
     if (state.reportGenerated && state.emissions) {
       const e = state.emissions;
-      const highest = Object.keys(e).filter(k => k !== 'total').sort((a,b) => e[b] - e[a])[0];
-      
+      const highest = Object.keys(e)
+        .filter((k) => k !== 'total')
+        .sort((a, b) => e[b] - e[a])[0];
+
       currentSuggestions = [
         `How can I reduce my ${highest} emissions?`,
         `Am I doing better than the national average?`,
-        `What is the easiest way to save 1 ton of CO₂?`
+        `What is the easiest way to save 1 ton of CO₂?`,
       ];
     }
 
-    currentSuggestions.forEach(q => {
+    currentSuggestions.forEach((q) => {
       const btn = document.createElement('button');
       btn.className = 'chat-suggestion-btn';
       btn.textContent = q;
@@ -86,11 +92,29 @@ export function renderChatWidget() {
   renderSuggestions();
 
   const toggleChat = () => {
-    wrapper.classList.toggle('collapsed');
+    const isCollapsed = wrapper.classList.toggle('collapsed');
+    if (!isCollapsed) {
+      const firstBtn = suggestionsContainer.querySelector(
+        '.chat-suggestion-btn'
+      );
+      if (firstBtn) {
+        firstBtn.focus();
+      } else {
+        closeBtn.focus();
+      }
+    } else {
+      fab.focus();
+    }
   };
 
   fab.addEventListener('click', toggleChat);
   closeBtn.addEventListener('click', toggleChat);
+
+  wrapper.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !wrapper.classList.contains('collapsed')) {
+      toggleChat();
+    }
+  });
 
   const sendMessage = (text) => {
     if (!text) return;
@@ -109,7 +133,7 @@ export function renderChatWidget() {
   const addMessage = (text, sender) => {
     const msgEl = document.createElement('div');
     msgEl.className = `chat-message ${sender}`;
-    
+
     let innerContent = '';
     if (sender === 'ai') {
       innerContent += '<div class="chat-message-avatar">✨</div>';
@@ -119,10 +143,10 @@ export function renderChatWidget() {
 
     const bubble = document.createElement('div');
     bubble.className = 'chat-message-bubble';
-    
+
     // Parse basic markdown (**) to strong tags securely without innerHTML
     const parts = text.split(/(\*\*.*?\*\*)/g);
-    parts.forEach(part => {
+    parts.forEach((part) => {
       if (part.startsWith('**') && part.endsWith('**')) {
         const strong = document.createElement('strong');
         strong.textContent = part.slice(2, -2);
@@ -134,7 +158,7 @@ export function renderChatWidget() {
 
     msgEl.innerHTML = innerContent;
     msgEl.appendChild(bubble);
-    
+
     messagesContainer.appendChild(msgEl);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
   };

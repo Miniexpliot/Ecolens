@@ -8,7 +8,11 @@
  * @module state
  */
 
-import { calculateAllEmissions, calculateActionSavings, calculatePercentages } from './calculations.js';
+import {
+  calculateAllEmissions,
+  calculateActionSavings,
+  calculatePercentages,
+} from './calculations.js';
 import { validateInputs } from './sanitize.js';
 import { ACTION_ITEMS, SAFE_TARGET, NATIONAL_AVERAGES } from './constants.js';
 
@@ -27,22 +31,22 @@ const defaultState = {
       commuteDistance: 15,
       commuteFrequency: 5,
       transitFrequency: 0,
-      bikeWalkFrequency: 0
+      bikeWalkFrequency: 0,
     },
     home: {
       heatingCooling: 'moderate',
       unplugAppliances: 'sometimesUnplug',
-      renewableEnergy: 'none'
+      renewableEnergy: 'none',
     },
     diet: {
       meatConsumption: 'frequently',
       recycling: 'sometimes',
-      composting: 'no'
+      composting: 'no',
     },
     shopping: {
-      fastFashion: 'moderate'
+      fastFashion: 'moderate',
     },
-    country: 'United States'
+    country: 'United States',
   },
   emissions: null,
   percentages: null,
@@ -50,7 +54,7 @@ const defaultState = {
   totalSavings: 0,
   projectedScore: 0,
   reportGenerated: false,
-  unlockedBadges: []
+  unlockedBadges: [],
 };
 
 /**
@@ -88,7 +92,7 @@ function loadState() {
         checkedActions: parsed.checkedActions,
         unlockedBadges: Array.isArray(parsed.unlockedBadges)
           ? parsed.unlockedBadges
-          : [...defaultState.unlockedBadges]
+          : [...defaultState.unlockedBadges],
       };
     }
   } catch (e) {
@@ -100,13 +104,16 @@ function loadState() {
     ...defaultState,
     inputs: JSON.parse(JSON.stringify(defaultState.inputs)),
     checkedActions: new Set(defaultState.checkedActions),
-    unlockedBadges: [...defaultState.unlockedBadges]
+    unlockedBadges: [...defaultState.unlockedBadges],
   };
 }
 
 function saveState() {
   try {
-    const stateToSave = { ..._state, checkedActions: Array.from(_state.checkedActions) };
+    const stateToSave = {
+      ..._state,
+      checkedActions: Array.from(_state.checkedActions),
+    };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
   } catch (e) {
     console.warn('Failed to save state to local storage', e);
@@ -138,7 +145,7 @@ const _listeners = new Set();
  */
 function _notifyListeners() {
   saveState();
-  _listeners.forEach(fn => {
+  _listeners.forEach((fn) => {
     try {
       fn({ ..._state });
     } catch (e) {
@@ -174,9 +181,11 @@ function _recalculateSavings() {
   if (!_state.emissions) return;
 
   let totalSavings = 0;
-  const relevantActions = ACTION_ITEMS.filter(item => item.condition(_state.inputs));
+  const relevantActions = ACTION_ITEMS.filter((item) =>
+    item.condition(_state.inputs)
+  );
 
-  relevantActions.forEach(item => {
+  relevantActions.forEach((item) => {
     if (_state.checkedActions.has(item.id)) {
       totalSavings += calculateActionSavings(item, _state.emissions);
     }
@@ -198,16 +207,43 @@ function _calculateBadges() {
   const i = _state.inputs;
 
   if (i.travel.transitFrequency >= 3 || i.travel.bikeWalkFrequency >= 3) {
-    badges.push({ id: 'transit_hero', name: 'Transit Hero', icon: '🚇', description: 'Uses sustainable transport 3+ days a week.' });
+    badges.push({
+      id: 'transit_hero',
+      name: 'Transit Hero',
+      icon: '🚇',
+      description: 'Uses sustainable transport 3+ days a week.',
+    });
   }
-  if (i.diet.meatConsumption === 'vegetarian' || i.diet.meatConsumption === 'vegan') {
-    badges.push({ id: 'plant_pioneer', name: 'Plant-Based Pioneer', icon: '🌱', description: 'Maintains a low-impact diet.' });
+  if (
+    i.diet.meatConsumption === 'vegetarian' ||
+    i.diet.meatConsumption === 'vegan'
+  ) {
+    badges.push({
+      id: 'plant_pioneer',
+      name: 'Plant-Based Pioneer',
+      icon: '🌱',
+      description: 'Maintains a low-impact diet.',
+    });
   }
-  if (i.home.renewableEnergy === 'full' || i.home.heatingCooling === 'minimal' || i.home.heatingCooling === 'none') {
-    badges.push({ id: 'energy_saver', name: 'Energy Saver', icon: '⚡', description: 'Highly efficient home energy usage.' });
+  if (
+    i.home.renewableEnergy === 'full' ||
+    i.home.heatingCooling === 'minimal' ||
+    i.home.heatingCooling === 'none'
+  ) {
+    badges.push({
+      id: 'energy_saver',
+      name: 'Energy Saver',
+      icon: '⚡',
+      description: 'Highly efficient home energy usage.',
+    });
   }
   if (_state.emissions && _state.emissions.total < SAFE_TARGET * 1.5) {
-    badges.push({ id: 'eco_champion', name: 'Eco Champion', icon: '🏆', description: 'Total footprint near the Paris Agreement target.' });
+    badges.push({
+      id: 'eco_champion',
+      name: 'Eco Champion',
+      icon: '🏆',
+      description: 'Total footprint near the Paris Agreement target.',
+    });
   }
 
   _state.unlockedBadges = badges;
@@ -239,9 +275,15 @@ export const Store = {
 
     // Deep merge inputs if provided
     if (updates.inputs) {
-      Object.keys(updates.inputs).forEach(category => {
-        if (_state.inputs[category] && typeof _state.inputs[category] === 'object') {
-          _state.inputs[category] = { ..._state.inputs[category], ...updates.inputs[category] };
+      Object.keys(updates.inputs).forEach((category) => {
+        if (
+          _state.inputs[category] &&
+          typeof _state.inputs[category] === 'object'
+        ) {
+          _state.inputs[category] = {
+            ..._state.inputs[category],
+            ...updates.inputs[category],
+          };
         } else {
           _state.inputs[category] = updates.inputs[category];
         }
@@ -250,7 +292,7 @@ export const Store = {
     }
 
     // Apply other state changes
-    Object.assign(_state, partial);
+    Object.assign(_state, updates);
 
     // Recalculate derived values if we already have a generated report
     if (_state.reportGenerated || _state.emissions) {
@@ -309,12 +351,12 @@ export const Store = {
    */
   getRelevantActions() {
     if (!_state.emissions) return [];
-    return ACTION_ITEMS
-      .filter(item => item.condition(_state.inputs))
-      .map(item => ({
+    return ACTION_ITEMS.filter((item) => item.condition(_state.inputs)).map(
+      (item) => ({
         ...item,
-        savingsTons: calculateActionSavings(item, _state.emissions)
-      }));
+        savingsTons: calculateActionSavings(item, _state.emissions),
+      })
+    );
   },
 
   /**
@@ -322,7 +364,10 @@ export const Store = {
    * @returns {number} Tons CO₂e per capita per year
    */
   getNationalAverage() {
-    return NATIONAL_AVERAGES[_state.inputs.country] || NATIONAL_AVERAGES['World Average'];
+    return (
+      NATIONAL_AVERAGES[_state.inputs.country] ||
+      NATIONAL_AVERAGES['World Average']
+    );
   },
 
   /**
@@ -338,5 +383,5 @@ export const Store = {
     _state.unlockedBadges = [];
     _emissionsCache = { key: '', value: null };
     _notifyListeners();
-  }
+  },
 };

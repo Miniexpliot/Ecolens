@@ -1,7 +1,7 @@
 /**
  * @fileoverview Central JSDoc Type Definitions
- * 
- * Provides strict TypeScript-like static typing for the entire application 
+ *
+ * Provides strict TypeScript-like static typing for the entire application
  * using standard JSDoc comments. This achieves the Code Quality goals of
  * strict typing without introducing a build step.
  *

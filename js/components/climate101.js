@@ -1,4 +1,8 @@
 /**
+ * @fileoverview EcoLens application module: climate101.js
+ * Follows strict Google JavaScript Style Guide.
+ */
+/**
  * EcoLens — Climate 101 Educational Hub Component
  * Comprehensive educational content about carbon footprints,
  * climate science, the Paris Agreement, and actionable tips.
@@ -100,7 +104,7 @@ export function renderClimate101() {
            ═══════════════════════════════════════════════════════ -->
       <div class="climate101__section">
         <div class="climate101__section-title animate-on-scroll">
-          <div class="climate101__section-icon" style="background: rgba(239, 68, 68, 0.15);">
+          <div class="climate101__section-icon climate101__section-icon--danger">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M12 2L2 22H22L12 2Z" stroke="#ef4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
               <line x1="12" y1="9" x2="12" y2="15" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
@@ -135,7 +139,7 @@ export function renderClimate101() {
 
           <!-- Ecosystems Card -->
           <div class="glass-card climate101__impact-card animate-on-scroll">
-            <div class="climate101__impact-icon" style="background: rgba(59, 130, 246, 0.15);">
+            <div class="climate101__impact-icon climate101__impact-icon--blue">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M2 12C2 12 5 8 8 10C11 12 10 16 13 16C16 16 15 12 18 10C21 8 22 12 22 12" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" fill="none"/>
                 <path d="M2 17C2 17 5 13 8 15C11 17 10 21 13 21C16 21 15 17 18 15C21 13 22 17 22 17" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.5"/>
@@ -179,7 +183,7 @@ export function renderClimate101() {
            ═══════════════════════════════════════════════════════ -->
       <div class="climate101__section">
         <div class="climate101__section-title animate-on-scroll">
-          <div class="climate101__section-icon" style="background: rgba(6, 182, 212, 0.15);">
+          <div class="climate101__section-icon climate101__section-icon--cyan">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <circle cx="12" cy="12" r="10" stroke="#06b6d4" stroke-width="1.5" fill="none"/>
               <circle cx="12" cy="12" r="6" stroke="#06b6d4" stroke-width="1.5" fill="none" opacity="0.6"/>
@@ -189,7 +193,7 @@ export function renderClimate101() {
           <h3>The Safe Target</h3>
         </div>
 
-        <div class="glass-card glass-card--static animate-on-scroll" style="margin-bottom: var(--space-xl);">
+        <div class="glass-card glass-card--static animate-on-scroll climate101__section-card">
           <p class="climate101__definition">
             The <strong>2015 Paris Agreement</strong> is a landmark international treaty adopted by 196 parties.
             It aims to limit global warming to well below 2°C — and ideally to <strong>1.5°C</strong> — above
@@ -204,7 +208,7 @@ export function renderClimate101() {
           </p>
         </div>
 
-        <h4 class="animate-on-scroll" style="margin-bottom: var(--space-lg); color: var(--text-secondary);">
+        <h4 class="animate-on-scroll climate101__section-subtitle">
           National Averages vs. Safe Target (tons CO₂e per person per year)
         </h4>
 
@@ -218,7 +222,7 @@ export function renderClimate101() {
            ═══════════════════════════════════════════════════════ -->
       <div class="climate101__section">
         <div class="climate101__section-title animate-on-scroll">
-          <div class="climate101__section-icon" style="background: rgba(245, 158, 11, 0.15);">
+          <div class="climate101__section-icon climate101__section-icon--warning">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
             </svg>
@@ -226,7 +230,7 @@ export function renderClimate101() {
           <h3>What Can You Do?</h3>
         </div>
 
-        <div class="glass-card glass-card--static animate-on-scroll" style="margin-bottom: var(--space-xl);">
+        <div class="glass-card glass-card--static animate-on-scroll climate101__section-card">
           <p class="climate101__definition">
             Individual action matters. While systemic change is essential — clean energy policy, industrial
             regulation, and corporate accountability — personal choices in transportation, energy, diet,
@@ -297,7 +301,7 @@ export function renderClimate101() {
         </div>
 
         <!-- CTA to calculator -->
-        <div style="text-align: center; margin-top: var(--space-2xl);" class="animate-on-scroll">
+        <div class="climate101__cta-container animate-on-scroll">
           <a href="#calculator" class="btn btn--primary btn--lg">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
               <rect x="2" y="2" width="14" height="14" rx="3" stroke="currentColor" stroke-width="1.5"/>
@@ -328,20 +332,25 @@ function buildCountryCards() {
     { name: 'United Kingdom', code: 'UK', value: 5.5 },
     { name: 'France', code: 'FR', value: 5 },
     { name: 'India', code: 'IN', value: 1.9 },
-    { name: 'World Avg', code: 'WORLD', value: 4.7 }
+    { name: 'World Avg', code: 'WORLD', value: 4.7 },
   ];
 
   const maxValue = 18; // for proportional bar width
 
-  return countries.map(c => {
-    const barPercent = Math.min((c.value / maxValue) * 100, 100);
-    const targetPercent = (SAFE_TARGET / maxValue) * 100;
-    const isSafe = c.value <= SAFE_TARGET;
-    const barColor = isSafe
-      ? '#10b981'
-      : c.value <= 6 ? '#06b6d4' : c.value <= 10 ? '#f59e0b' : '#ef4444';
+  return countries
+    .map((c) => {
+      const barPercent = Math.min((c.value / maxValue) * 100, 100);
+      const targetPercent = (SAFE_TARGET / maxValue) * 100;
+      const isSafe = c.value <= SAFE_TARGET;
+      const barColor = isSafe
+        ? '#10b981'
+        : c.value <= 6
+          ? '#06b6d4'
+          : c.value <= 10
+            ? '#f59e0b'
+            : '#ef4444';
 
-    return `
+      return `
       <div class="climate101__country-card animate-on-scroll" role="listitem" aria-label="${c.name}: ${c.value} tons CO₂e per year">
         <div class="climate101__country-name">${c.name}</div>
         <div class="climate101__country-value" style="color: ${barColor}">${c.value}t</div>
@@ -351,5 +360,6 @@ function buildCountryCards() {
         </div>
       </div>
     `;
-  }).join('');
+    })
+    .join('');
 }

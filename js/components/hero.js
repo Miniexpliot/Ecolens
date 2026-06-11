@@ -1,4 +1,8 @@
 /**
+ * @fileoverview EcoLens application module: hero.js
+ * Follows strict Google JavaScript Style Guide.
+ */
+/**
  * EcoLens — Hero / Landing Section Component
  * Animated gradient background, key stats, floating decorations,
  * and dual call-to-action buttons.

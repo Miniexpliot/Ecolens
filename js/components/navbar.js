@@ -1,4 +1,8 @@
 /**
+ * @fileoverview EcoLens application module: navbar.js
+ * Follows strict Google JavaScript Style Guide.
+ */
+/**
  * EcoLens — Navbar Component
  * Fixed-top glassmorphic navigation bar with mobile hamburger menu,
  * skip navigation link, and accessible ARIA attributes.
@@ -68,7 +72,7 @@ export function renderNavbar() {
   });
 
   // Close mobile menu when a link is clicked
-  links.querySelectorAll('.nav-link').forEach(link => {
+  links.querySelectorAll('.nav-link').forEach((link) => {
     link.addEventListener('click', () => {
       links.classList.remove('navbar__links--open');
       hamburger.setAttribute('aria-expanded', 'false');

@@ -44,9 +44,9 @@ export function sanitizeText(value) {
 /**
  * Safely sets innerHTML with sanitized content.
  * Uses DOMParser to build an inert DOM, strips dangerous tags and attributes
- * (e.g., inline event handlers like onclick, javascript: URIs), and then 
+ * (e.g., inline event handlers like onclick, javascript: URIs), and then
  * applies the safe content to the target element.
- * 
+ *
  * @param {HTMLElement} element - Target DOM element
  * @param {string} html - HTML string to be sanitized and injected
  */
@@ -55,8 +55,15 @@ export function safeSetHTML(element, html) {
   const doc = parser.parseFromString(html, 'text/html');
   const inertBody = doc.body;
 
-  const dangerousTags = ['script', 'iframe', 'object', 'embed', 'style', 'base'];
-  
+  const dangerousTags = [
+    'script',
+    'iframe',
+    'object',
+    'embed',
+    'style',
+    'base',
+  ];
+
   const walk = (node) => {
     if (node.nodeType === Node.ELEMENT_NODE) {
       const tagName = node.tagName.toLowerCase();
@@ -64,7 +71,7 @@ export function safeSetHTML(element, html) {
         node.remove();
         return;
       }
-      
+
       const attrs = Array.from(node.attributes);
       for (const attr of attrs) {
         const name = attr.name.toLowerCase();
@@ -75,7 +82,7 @@ export function safeSetHTML(element, html) {
         }
       }
     }
-    
+
     // Create a static array of children to iterate over safely while removing nodes
     const children = Array.from(node.childNodes);
     for (const child of children) {
@@ -84,7 +91,7 @@ export function safeSetHTML(element, html) {
   };
 
   walk(inertBody);
-  
+
   element.innerHTML = inertBody.innerHTML;
 }
 
@@ -118,7 +125,7 @@ export function createSafeSelect(config) {
     select.setAttribute('aria-describedby', config.ariaDescribedBy);
   }
 
-  config.options.forEach(opt => {
+  config.options.forEach((opt) => {
     const option = document.createElement('option');
     option.value = opt.value;
     option.textContent = opt.text;
@@ -219,7 +226,7 @@ export function createSafeRangeInput(config) {
 
   const labelWrapper = document.createElement('div');
   labelWrapper.className = 'range-label-wrapper';
-  
+
   const label = document.createElement('label');
   label.setAttribute('for', config.id);
   label.textContent = config.label;
@@ -257,7 +264,7 @@ export function createSafeRangeInput(config) {
   }
 
   inputWrapper.appendChild(input);
-  
+
   wrapper.appendChild(labelWrapper);
   wrapper.appendChild(inputWrapper);
   return wrapper;
@@ -289,7 +296,7 @@ export function createRadioCards(config) {
 
   config.options.forEach((opt, index) => {
     const radioId = `${config.id}-${index}`;
-    
+
     const cardLabel = document.createElement('label');
     cardLabel.className = 'radio-card';
     cardLabel.setAttribute('for', radioId);
@@ -306,7 +313,7 @@ export function createRadioCards(config) {
 
     const cardVisual = document.createElement('div');
     cardVisual.className = 'radio-card__visual';
-    
+
     const iconEl = document.createElement('div');
     iconEl.className = 'radio-card__icon';
     iconEl.textContent = opt.icon || '•';
@@ -321,7 +328,7 @@ export function createRadioCards(config) {
     cardLabel.appendChild(input);
     cardLabel.appendChild(cardVisual);
     cardsContainer.appendChild(cardLabel);
-    
+
     if (config.onChange) {
       input.addEventListener('change', (e) => config.onChange(e.target.value));
     }
@@ -357,7 +364,7 @@ export function validateInputs(rawInputs) {
 
   // Treat null/undefined/non-objects as fully empty — we still sanitize
   // with defaults rather than returning null, so the app never crashes.
-  const raw = (rawInputs && typeof rawInputs === 'object') ? rawInputs : {};
+  const raw = rawInputs && typeof rawInputs === 'object' ? rawInputs : {};
 
   // Flag if no meaningful input sections were provided.
   if (!raw.travel && !raw.home && !raw.diet && !raw.shopping) {
@@ -370,15 +377,38 @@ export function validateInputs(rawInputs) {
     ? raw.travel.carType
     : 'gas';
 
-  const travelCommuteDistance    = sanitizeNumber(raw.travel?.commuteDistance,    0, 500, 15);
-  const travelCommuteFrequency   = sanitizeNumber(raw.travel?.commuteFrequency,   0, 7,   5);
-  const travelTransitFrequency   = sanitizeNumber(raw.travel?.transitFrequency,   0, 7,   0);
-  const travelBikeWalkFrequency  = sanitizeNumber(raw.travel?.bikeWalkFrequency,  0, 7,   0);
+  const travelCommuteDistance = sanitizeNumber(
+    raw.travel?.commuteDistance,
+    0,
+    500,
+    15
+  );
+  const travelCommuteFrequency = sanitizeNumber(
+    raw.travel?.commuteFrequency,
+    0,
+    7,
+    5
+  );
+  const travelTransitFrequency = sanitizeNumber(
+    raw.travel?.transitFrequency,
+    0,
+    7,
+    0
+  );
+  const travelBikeWalkFrequency = sanitizeNumber(
+    raw.travel?.bikeWalkFrequency,
+    0,
+    7,
+    0
+  );
 
   // Validate that total travel days don't exceed 7
-  const totalTravelDays = travelCommuteFrequency + travelTransitFrequency + travelBikeWalkFrequency;
+  const totalTravelDays =
+    travelCommuteFrequency + travelTransitFrequency + travelBikeWalkFrequency;
   if (totalTravelDays > 7) {
-    errors.push('Total travel days per week cannot exceed 7; values have been clamped.');
+    errors.push(
+      'Total travel days per week cannot exceed 7; values have been clamped.'
+    );
   }
 
   // ── Home ──────────────────────────────────────────────────────────────
@@ -387,7 +417,11 @@ export function validateInputs(rawInputs) {
     ? raw.home.heatingCooling
     : 'moderate';
 
-  const validUnplug = Object.freeze(['neverUnplug', 'sometimesUnplug', 'alwaysUnplug']);
+  const validUnplug = Object.freeze([
+    'neverUnplug',
+    'sometimesUnplug',
+    'alwaysUnplug',
+  ]);
   const homeUnplugAppliances = validUnplug.includes(raw.home?.unplugAppliances)
     ? raw.home.unplugAppliances
     : 'sometimesUnplug';
@@ -398,7 +432,13 @@ export function validateInputs(rawInputs) {
     : 'none';
 
   // ── Diet & Waste ──────────────────────────────────────────────────────
-  const validMeat = Object.freeze(['daily', 'frequently', 'occasionally', 'vegetarian', 'vegan']);
+  const validMeat = Object.freeze([
+    'daily',
+    'frequently',
+    'occasionally',
+    'vegetarian',
+    'vegan',
+  ]);
   const dietMeatConsumption = validMeat.includes(raw.diet?.meatConsumption)
     ? raw.diet.meatConsumption
     : 'frequently';
@@ -414,7 +454,12 @@ export function validateInputs(rawInputs) {
     : 'no';
 
   // ── Shopping ──────────────────────────────────────────────────────────
-  const validFashion = Object.freeze(['high', 'moderate', 'minimal', 'secondhand']);
+  const validFashion = Object.freeze([
+    'high',
+    'moderate',
+    'minimal',
+    'secondhand',
+  ]);
   const shoppingFastFashion = validFashion.includes(raw.shopping?.fastFashion)
     ? raw.shopping.fastFashion
     : 'moderate';
@@ -431,22 +476,22 @@ export function validateInputs(rawInputs) {
       commuteDistance: travelCommuteDistance,
       commuteFrequency: travelCommuteFrequency,
       transitFrequency: travelTransitFrequency,
-      bikeWalkFrequency: travelBikeWalkFrequency
+      bikeWalkFrequency: travelBikeWalkFrequency,
     },
     home: {
       heatingCooling: homeHeatingCooling,
       unplugAppliances: homeUnplugAppliances,
-      renewableEnergy: homeRenewableEnergy
+      renewableEnergy: homeRenewableEnergy,
     },
     diet: {
       meatConsumption: dietMeatConsumption,
       recycling: dietRecycling,
-      composting: dietComposting
+      composting: dietComposting,
     },
     shopping: {
-      fastFashion: shoppingFastFashion
+      fastFashion: shoppingFastFashion,
     },
-    country
+    country,
   };
 
   return { valid: errors.length === 0, data, errors };

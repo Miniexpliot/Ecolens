@@ -1,4 +1,8 @@
 /**
+ * @fileoverview EcoLens application module: app.js
+ * Follows strict Google JavaScript Style Guide.
+ */
+/**
  * EcoLens — Main Application Entry Point
  * Orchestrates the router, all UI components, Store subscriptions,
  * view transitions, the debug panel, and scroll-triggered animations.
@@ -9,14 +13,23 @@ import { Store } from './state.js';
 import { renderNavbar } from './components/navbar.js';
 import { renderHero } from './components/hero.js';
 import { renderClimate101 } from './components/climate101.js';
-import { renderCalculator } from './components/calculator.js';
+import { renderCalculator } from './components/calculator/index.js';
 import { renderReport } from './components/report.js';
 import { renderActionPlan } from './components/action-plan.js';
-import { renderDebugPanel, initDebugShortcut } from './components/debug-panel.js';
+import {
+  renderDebugPanel,
+  initDebugShortcut,
+} from './components/debug-panel.js';
 import { init3DBackground } from './components/background-3d.js';
 import { renderChatWidget } from './components/chat-widget.js';
-import { updateProjectedScore, updateActionMetrics } from './components/results-updater.js';
-import { initScrollObserver, observeScrollElements } from './components/scroll-observer.js';
+import {
+  updateProjectedScore,
+  updateActionMetrics,
+} from './components/results-updater.js';
+import {
+  initScrollObserver,
+  observeScrollElements,
+} from './components/scroll-observer.js';
 
 /* ── DOM References ─────────────────────────────────────────── */
 const appRoot = document.getElementById('app-root');
@@ -26,7 +39,7 @@ const viewRenderers = {
   home: renderHome,
   climate101: renderClimate101View,
   calculator: renderCalculatorView,
-  results: renderResultsView
+  results: renderResultsView,
 };
 
 /* ── Previous view for diff-checking ────────────────────────── */
@@ -79,11 +92,11 @@ function renderResultsView() {
     const welcome = document.createElement('section');
     welcome.className = 'section container';
     welcome.innerHTML = `
-      <div class="glass-card glass-card--static welcome-message" style="margin-top: 2rem;">
+      <div class="glass-card glass-card--static welcome-message results-welcome-card">
         <h3>No Report Yet</h3>
         <p>You haven't calculated your carbon footprint yet.<br>
            Use the calculator to get your personalized report.</p>
-        <a href="#calculator" class="btn btn--primary" style="margin-top: 1rem;">Open Calculator</a>
+        <a href="#calculator" class="btn btn--primary results-welcome-link">Open Calculator</a>
       </div>
     `;
     fragment.appendChild(welcome);
@@ -100,7 +113,7 @@ function renderResultsView() {
 /**
  * Handles the main rendering logic for the application, transitioning
  * between views and setting up root elements.
- * 
+ *
  * @param {import('./types.js').ApplicationState} state - Current application state
  */
 function renderApp(state) {
@@ -160,7 +173,7 @@ function renderApp(state) {
 
 /**
  * Swaps the main content with the new view and manages entry animations.
- * 
+ *
  * @param {HTMLElement} mainContent - The main view container
  * @param {string} currentView - The identifier of the new view
  * @param {number} startTime - Performance timestamp for render metrics
@@ -196,7 +209,7 @@ function swapContent(mainContent, currentView, startTime) {
 /**
  * Subscribe callback triggered whenever the global Store changes.
  * Either re-renders the full app or applies targeted DOM updates.
- * 
+ *
  * @param {import('./types.js').ApplicationState} state - Current application state
  */
 function handleStoreUpdate(state) {

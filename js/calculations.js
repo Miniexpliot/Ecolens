@@ -121,14 +121,23 @@ function _kgToTons(kilograms) {
  * @returns {number} Annual car commute emissions in kg CO₂e
  */
 function _calculateCarEmissionsKg(inputs) {
-  const { carType, commuteDistance, commuteFrequency, transitFrequency, bikeWalkFrequency } = inputs;
+  const {
+    carType,
+    commuteDistance,
+    commuteFrequency,
+    transitFrequency,
+    bikeWalkFrequency,
+  } = inputs;
 
   const carFactorKgPerMile = EMISSION_FACTORS.travel.carPerMile[carType] ?? 0;
-  const roundTripMiles     = commuteDistance * 2;
-  const weeksPerYear       = 50; // ≈ 50 active working weeks (2 weeks holiday)
+  const roundTripMiles = commuteDistance * 2;
+  const weeksPerYear = 50; // ≈ 50 active working weeks (2 weeks holiday)
 
   // Days effectively driven = raw commute days minus days replaced by alternatives.
-  const effectiveCarDays = Math.max(0, commuteFrequency - transitFrequency - bikeWalkFrequency);
+  const effectiveCarDays = Math.max(
+    0,
+    commuteFrequency - transitFrequency - bikeWalkFrequency
+  );
 
   return roundTripMiles * carFactorKgPerMile * effectiveCarDays * weeksPerYear;
 }
@@ -149,10 +158,12 @@ function _calculateTransitEmissionsKg(inputs) {
 
   const { bus, train } = EMISSION_FACTORS.travel.transitPerMile;
   const avgTransitFactorKgPerMile = (bus + train) / 2;
-  const roundTripMiles            = commuteDistance * 2;
-  const weeksPerYear              = 50;
+  const roundTripMiles = commuteDistance * 2;
+  const weeksPerYear = 50;
 
-  return roundTripMiles * avgTransitFactorKgPerMile * transitFrequency * weeksPerYear;
+  return (
+    roundTripMiles * avgTransitFactorKgPerMile * transitFrequency * weeksPerYear
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -171,7 +182,7 @@ function _calculateTransitEmissionsKg(inputs) {
  * @returns {number} Annual tons CO₂e from travel
  */
 export function calculateTravelEmissions(inputs) {
-  const carKg     = _calculateCarEmissionsKg(inputs);
+  const carKg = _calculateCarEmissionsKg(inputs);
   const transitKg = _calculateTransitEmissionsKg(inputs);
 
   return _roundTons(_kgToTons(carKg + transitKg));
@@ -194,9 +205,12 @@ export function calculateTravelEmissions(inputs) {
 export function calculateHomeEmissions(inputs) {
   const { heatingCooling, unplugAppliances, renewableEnergy } = inputs;
 
-  const heatingTons    = EMISSION_FACTORS.home.heatingCooling[heatingCooling]   ?? 1.5;
-  const applianceTons  = EMISSION_FACTORS.home.appliances[unplugAppliances]      ?? 0.5;
-  const renewFactor    = EMISSION_FACTORS.home.renewableFactor[renewableEnergy]  ?? 1.0;
+  const heatingTons =
+    EMISSION_FACTORS.home.heatingCooling[heatingCooling] ?? 1.5;
+  const applianceTons =
+    EMISSION_FACTORS.home.appliances[unplugAppliances] ?? 0.5;
+  const renewFactor =
+    EMISSION_FACTORS.home.renewableFactor[renewableEnergy] ?? 1.0;
 
   return _roundTons((heatingTons + applianceTons) * renewFactor);
 }
@@ -218,9 +232,10 @@ export function calculateHomeEmissions(inputs) {
 export function calculateDietWasteEmissions(inputs) {
   const { meatConsumption, recycling, composting } = inputs;
 
-  const meatTons      = EMISSION_FACTORS.diet.meatConsumption[meatConsumption] ?? 2.5;
-  const recyclingTons = EMISSION_FACTORS.waste.recycling[recycling]            ?? 0.3;
-  const compostTons   = EMISSION_FACTORS.waste.composting[composting]          ?? 0;
+  const meatTons =
+    EMISSION_FACTORS.diet.meatConsumption[meatConsumption] ?? 2.5;
+  const recyclingTons = EMISSION_FACTORS.waste.recycling[recycling] ?? 0.3;
+  const compostTons = EMISSION_FACTORS.waste.composting[composting] ?? 0;
 
   return _roundTons(meatTons + recyclingTons + compostTons);
 }
@@ -255,11 +270,11 @@ export function calculateShoppingEmissions(inputs) {
  * @returns {EmissionsBreakdown} Rounded annual emission values per category + total
  */
 export function calculateAllEmissions(inputs) {
-  const travel   = calculateTravelEmissions(inputs.travel);
-  const home     = calculateHomeEmissions(inputs.home);
-  const diet     = calculateDietWasteEmissions(inputs.diet);
+  const travel = calculateTravelEmissions(inputs.travel);
+  const home = calculateHomeEmissions(inputs.home);
+  const diet = calculateDietWasteEmissions(inputs.diet);
   const shopping = calculateShoppingEmissions(inputs.shopping);
-  const total    = _roundTons(travel + home + diet + shopping);
+  const total = _roundTons(travel + home + diet + shopping);
 
   return { travel, home, diet, shopping, total };
 }
@@ -284,13 +299,21 @@ export function calculateAllEmissions(inputs) {
  */
 export function calculateActionSavings(actionItem, emissions) {
   /** @type {Record<string, number>} Baseline emissions assumed by action-item authors */
-  const BASELINE_CATEGORY_TONS = Object.freeze({ travel: 4.0, home: 2.0, diet: 3.0, shopping: 0.5 });
+  const BASELINE_CATEGORY_TONS = Object.freeze({
+    travel: 4.0,
+    home: 2.0,
+    diet: 3.0,
+    shopping: 0.5,
+  });
 
   const categoryEmissions = emissions[actionItem.category] ?? 0;
-  const baseline          = BASELINE_CATEGORY_TONS[actionItem.category] ?? 1;
+  const baseline = BASELINE_CATEGORY_TONS[actionItem.category] ?? 1;
 
   // Clamp scale factor to prevent nonsensical savings estimates.
-  const scaleFactor       = Math.max(0.3, Math.min(2.0, categoryEmissions / baseline));
+  const scaleFactor = Math.max(
+    0.3,
+    Math.min(2.0, categoryEmissions / baseline)
+  );
   const adjustedSavingsKg = actionItem.baseSavingsKg * scaleFactor;
 
   return _roundTons(_kgToTons(adjustedSavingsKg));
@@ -324,9 +347,9 @@ export function calculatePercentages(emissions) {
   const { total } = emissions;
 
   return {
-    travel:   Math.round((emissions.travel   / total) * 100),
-    home:     Math.round((emissions.home     / total) * 100),
-    diet:     Math.round((emissions.diet     / total) * 100),
-    shopping: Math.round((emissions.shopping / total) * 100)
+    travel: Math.round((emissions.travel / total) * 100),
+    home: Math.round((emissions.home / total) * 100),
+    diet: Math.round((emissions.diet / total) * 100),
+    shopping: Math.round((emissions.shopping / total) * 100),
   };
 }

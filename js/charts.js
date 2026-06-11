@@ -74,6 +74,11 @@ function _injectStyles() {
       opacity: 0.85;
       filter: drop-shadow(0 4px 12px rgba(0,0,0,0.25));
     }
+    .donut-segment:focus-visible {
+      outline: 3px solid #10b981;
+      outline-offset: 4px;
+      opacity: 0.9;
+    }
 
     /* ── Bar chart ──────────────────────────────────────────────────────── */
     .bar-rect {
@@ -84,6 +89,11 @@ function _injectStyles() {
     .bar-rect:hover {
       opacity: 0.85;
       filter: drop-shadow(0 2px 8px rgba(0,0,0,0.2));
+    }
+    .bar-rect:focus-visible {
+      outline: 3px solid #10b981;
+      outline-offset: 2px;
+      opacity: 0.9;
     }
 
     /* ── Gauge ──────────────────────────────────────────────────────────── */
@@ -172,7 +182,7 @@ function createTooltip(container) {
     },
     hide() {
       el.classList.remove('visible');
-    }
+    },
   };
 }
 
@@ -188,17 +198,34 @@ function createTooltip(container) {
  */
 function addGradient(defs, color, id) {
   // Radial gradient for donut segments
-  const radial = svgEl('radialGradient', { id: `${id}-radial`, cx: '50%', cy: '50%', r: '50%' });
-  const stop1 = svgEl('stop', { offset: '0%', 'stop-color': _lighten(color, 20) });
+  const radial = svgEl('radialGradient', {
+    id: `${id}-radial`,
+    cx: '50%',
+    cy: '50%',
+    r: '50%',
+  });
+  const stop1 = svgEl('stop', {
+    offset: '0%',
+    'stop-color': _lighten(color, 20),
+  });
   const stop2 = svgEl('stop', { offset: '100%', 'stop-color': color });
   radial.appendChild(stop1);
   radial.appendChild(stop2);
   defs.appendChild(radial);
 
   // Linear gradient for bar charts
-  const linear = svgEl('linearGradient', { id: `${id}-linear`, x1: '0', y1: '0', x2: '1', y2: '0' });
+  const linear = svgEl('linearGradient', {
+    id: `${id}-linear`,
+    x1: '0',
+    y1: '0',
+    x2: '1',
+    y2: '0',
+  });
   const ls1 = svgEl('stop', { offset: '0%', 'stop-color': color });
-  const ls2 = svgEl('stop', { offset: '100%', 'stop-color': _lighten(color, 15) });
+  const ls2 = svgEl('stop', {
+    offset: '100%',
+    'stop-color': _lighten(color, 15),
+  });
   linear.appendChild(ls1);
   linear.appendChild(ls2);
   defs.appendChild(linear);
@@ -216,7 +243,7 @@ function _lighten(hex, percent) {
   const r = Math.min(255, (num >> 16) + Math.round(2.55 * percent));
   const g = Math.min(255, ((num >> 8) & 0x00ff) + Math.round(2.55 * percent));
   const b = Math.min(255, (num & 0x0000ff) + Math.round(2.55 * percent));
-  return `#${(1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1)}`;
+  return `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1)}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -233,18 +260,21 @@ export function renderDonutChart(containerId, segments) {
   _injectStyles();
 
   const container = document.getElementById(containerId);
-  if (!container) { console.warn(`renderDonutChart: container #${containerId} not found`); return; }
+  if (!container) {
+    console.warn(`renderDonutChart: container #${containerId} not found`);
+    return;
+  }
 
   container.innerHTML = '';
   container.classList.add('eco-chart-container');
 
   // Filter out zero-value segments
-  const validSegments = segments.filter(s => s.value > 0);
+  const validSegments = segments.filter((s) => s.value > 0);
   if (validSegments.length === 0) {
     container.innerHTML = `
-      <div class="glass-card glass-card--danger" style="text-align:center; padding: 2rem;">
-        <h4 style="color:var(--color-danger); margin-bottom:0.5rem;">⚠️ Error</h4>
-        <p style="color:#94a3b8;">No values found for the chart.</p>
+      <div class="glass-card glass-card--danger chart-error-card">
+        <h4 class="chart-error-title">⚠️ Error</h4>
+        <p class="chart-error-text">No values found for the chart.</p>
       </div>`;
     return;
   }
@@ -264,18 +294,41 @@ export function renderDonutChart(containerId, segments) {
   const svg = svgEl('svg', {
     viewBox: `0 0 ${size} ${size}`,
     'aria-label': 'Donut chart showing carbon footprint breakdown by category',
-    role: 'img'
+    role: 'img',
   });
 
   // ── Defs: gradients + shadow filter ───────────────────────────────────
   const defs = svgEl('defs');
 
   // Drop shadow filter
-  const filter = svgEl('filter', { id: `${chartId}-shadow`, x: '-20%', y: '-20%', width: '140%', height: '140%' });
-  const feGauss = svgEl('feGaussianBlur', { in: 'SourceAlpha', stdDeviation: '3', result: 'blur' });
-  const feOffset = svgEl('feOffset', { in: 'blur', dx: '0', dy: '2', result: 'shifted' });
-  const feFlood = svgEl('feFlood', { 'flood-color': 'rgba(0,0,0,0.15)', result: 'color' });
-  const feComposite = svgEl('feComposite', { in: 'color', in2: 'shifted', operator: 'in', result: 'shadow' });
+  const filter = svgEl('filter', {
+    id: `${chartId}-shadow`,
+    x: '-20%',
+    y: '-20%',
+    width: '140%',
+    height: '140%',
+  });
+  const feGauss = svgEl('feGaussianBlur', {
+    in: 'SourceAlpha',
+    stdDeviation: '3',
+    result: 'blur',
+  });
+  const feOffset = svgEl('feOffset', {
+    in: 'blur',
+    dx: '0',
+    dy: '2',
+    result: 'shifted',
+  });
+  const feFlood = svgEl('feFlood', {
+    'flood-color': 'rgba(0,0,0,0.15)',
+    result: 'color',
+  });
+  const feComposite = svgEl('feComposite', {
+    in: 'color',
+    in2: 'shifted',
+    operator: 'in',
+    result: 'shadow',
+  });
   const feMerge = svgEl('feMerge');
   const fmn1 = svgEl('feMergeNode', { in: 'shadow' });
   const fmn2 = svgEl('feMergeNode', { in: 'SourceGraphic' });
@@ -288,16 +341,20 @@ export function renderDonutChart(containerId, segments) {
   filter.appendChild(feMerge);
   defs.appendChild(filter);
 
-  validSegments.forEach((seg, i) => addGradient(defs, seg.color, `${chartId}-seg${i}`));
+  validSegments.forEach((seg, i) =>
+    addGradient(defs, seg.color, `${chartId}-seg${i}`)
+  );
   svg.appendChild(defs);
 
   // ── Background ring ───────────────────────────────────────────────────
   const bgRing = svgEl('circle', {
-    cx, cy, r,
+    cx,
+    cy,
+    r,
     fill: 'none',
     stroke: '#e2e8f0',
     'stroke-width': strokeWidth,
-    opacity: '0.5'
+    opacity: '0.5',
   });
   svg.appendChild(bgRing);
 
@@ -311,7 +368,9 @@ export function renderDonutChart(containerId, segments) {
     const dashLength = Math.max(0, segLength - gap);
 
     const circle = svgEl('circle', {
-      cx, cy, r,
+      cx,
+      cy,
+      r,
       fill: 'none',
       stroke: `url(#${chartId}-seg${i}-radial)`,
       'stroke-width': strokeWidth,
@@ -323,7 +382,10 @@ export function renderDonutChart(containerId, segments) {
       'data-index': i,
       'data-label': seg.label,
       'data-value': seg.value.toFixed(2),
-      'data-pct': (fraction * 100).toFixed(1)
+      'data-pct': (fraction * 100).toFixed(1),
+      tabindex: '0',
+      role: 'button',
+      'aria-label': `${seg.label}: ${seg.value.toFixed(2)} tons (${(fraction * 100).toFixed(1)}%)`,
     });
     circle.classList.add('donut-segment');
 
@@ -342,37 +404,42 @@ export function renderDonutChart(containerId, segments) {
 
   // ── Centre label ──────────────────────────────────────────────────────
   const centerCircle = svgEl('circle', {
-    cx, cy, r: outerR - strokeWidth - 6,
+    cx,
+    cy,
+    r: outerR - strokeWidth - 6,
     fill: 'white',
-    filter: `url(#${chartId}-shadow)`
+    filter: `url(#${chartId}-shadow)`,
   });
   svg.appendChild(centerCircle);
 
   const totalLabel = svgEl('text', {
-    x: cx, y: cy - 10,
+    x: cx,
+    y: cy - 10,
     'text-anchor': 'middle',
     'font-size': '14',
     'font-weight': '600',
-    fill: '#64748b'
+    fill: '#64748b',
   });
   totalLabel.textContent = 'Total';
   svg.appendChild(totalLabel);
 
   const totalValue = svgEl('text', {
-    x: cx, y: cy + 16,
+    x: cx,
+    y: cy + 16,
     'text-anchor': 'middle',
     'font-size': '28',
     'font-weight': '700',
-    fill: '#0f172a'
+    fill: '#0f172a',
   });
   totalValue.textContent = `${total.toFixed(1)}`;
   svg.appendChild(totalValue);
 
   const totalUnit = svgEl('text', {
-    x: cx, y: cy + 34,
+    x: cx,
+    y: cy + 34,
     'text-anchor': 'middle',
     'font-size': '11',
-    fill: '#94a3b8'
+    fill: '#94a3b8',
   });
   totalUnit.textContent = 'tons CO₂e/yr';
   svg.appendChild(totalUnit);
@@ -384,22 +451,46 @@ export function renderDonutChart(containerId, segments) {
 
   svg.addEventListener('mousemove', (e) => {
     const target = e.target.closest('.donut-segment');
-    if (!target) { tooltip.hide(); return; }
+    if (!target) {
+      tooltip.hide();
+      return;
+    }
     const label = target.getAttribute('data-label');
     const value = target.getAttribute('data-value');
     const pct = target.getAttribute('data-pct');
-    tooltip.show(e.clientX, e.clientY,
+    tooltip.show(
+      e.clientX,
+      e.clientY,
       `<strong>${label}</strong><br>${value} tons CO₂e (${pct}%)`
     );
   });
   svg.addEventListener('mouseleave', () => tooltip.hide());
+
+  // Keyboard navigation for tooltip
+  svg.addEventListener('focusin', (e) => {
+    const target = e.target.closest('.donut-segment');
+    if (!target) return;
+    const label = target.getAttribute('data-label');
+    const value = target.getAttribute('data-value');
+    const pct = target.getAttribute('data-pct');
+    const elRect = target.getBoundingClientRect();
+    tooltip.show(
+      elRect.left + elRect.width / 2,
+      elRect.top + elRect.height / 2,
+      `<strong>${label}</strong><br>${value} tons CO₂e (${pct}%)`
+    );
+  });
+  svg.addEventListener('focusout', () => tooltip.hide());
+  svg.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') tooltip.hide();
+  });
 
   // ── Legend ────────────────────────────────────────────────────────────
   const legend = document.createElement('div');
   legend.className = 'chart-legend';
   legend.setAttribute('aria-label', 'Chart legend');
 
-  validSegments.forEach(seg => {
+  validSegments.forEach((seg) => {
     const item = document.createElement('div');
     item.className = 'chart-legend-item';
     const swatch = document.createElement('span');
@@ -412,7 +503,7 @@ export function renderDonutChart(containerId, segments) {
     item.appendChild(text);
     legend.appendChild(item);
   });
-  
+
   container.appendChild(legend);
 
   // ── Accessible Data Table Fallback ────────────────────────────────────
@@ -428,13 +519,17 @@ export function renderDonutChart(containerId, segments) {
       </tr>
     </thead>
     <tbody>
-      ${validSegments.map(s => `
+      ${validSegments
+        .map(
+          (s) => `
         <tr>
           <td>${s.label}</td>
           <td>${s.value.toFixed(2)}</td>
           <td>${((s.value / total) * 100).toFixed(1)}%</td>
         </tr>
-      `).join('')}
+      `
+        )
+        .join('')}
     </tbody>
   `;
   container.appendChild(table);
@@ -461,12 +556,12 @@ export function updateDonutChart(containerId, segments) {
     return;
   }
 
-  const validSegments = segments.filter(s => s.value > 0);
+  const validSegments = segments.filter((s) => s.value > 0);
   if (validSegments.length === 0) {
     container.innerHTML = `
-      <div class="glass-card glass-card--danger" style="text-align:center; padding: 2rem;">
-        <h4 style="color:var(--color-danger); margin-bottom:0.5rem;">⚠️ Error</h4>
-        <p style="color:#94a3b8;">No values found for the chart.</p>
+      <div class="glass-card glass-card--danger chart-error-card">
+        <h4 class="chart-error-title">⚠️ Error</h4>
+        <p class="chart-error-text">No values found for the chart.</p>
       </div>`;
     return;
   }
@@ -492,7 +587,10 @@ export function updateDonutChart(containerId, segments) {
     const dashLength = Math.max(0, segLength - gap);
 
     const circle = circles[i];
-    circle.setAttribute('stroke-dasharray', `${dashLength} ${circumference - dashLength}`);
+    circle.setAttribute(
+      'stroke-dasharray',
+      `${dashLength} ${circumference - dashLength}`
+    );
     circle.setAttribute('stroke-dashoffset', `${-cumulativeOffset - gap / 2}`);
     circle.setAttribute('data-label', seg.label);
     circle.setAttribute('data-value', seg.value.toFixed(2));
@@ -535,22 +633,25 @@ export function renderBarChart(containerId, bars) {
   _injectStyles();
 
   const container = document.getElementById(containerId);
-  if (!container) { console.warn(`renderBarChart: container #${containerId} not found`); return; }
+  if (!container) {
+    console.warn(`renderBarChart: container #${containerId} not found`);
+    return;
+  }
 
   container.innerHTML = '';
   container.classList.add('eco-chart-container');
 
   if (!bars || bars.length === 0) {
     container.innerHTML = `
-      <div class="glass-card glass-card--danger" style="text-align:center; padding: 2rem;">
-        <h4 style="color:var(--color-danger); margin-bottom:0.5rem;">⚠️ Error</h4>
-        <p style="color:#94a3b8;">No values found for the chart.</p>
+      <div class="glass-card glass-card--danger chart-error-card">
+        <h4 class="chart-error-title">⚠️ Error</h4>
+        <p class="chart-error-text">No values found for the chart.</p>
       </div>`;
     return;
   }
 
   const chartId = uid('bar');
-  const maxValue = Math.max(...bars.map(b => b.value), 0.1);
+  const maxValue = Math.max(...bars.map((b) => b.value), 0.1);
 
   const barHeight = 36;
   const barGap = 20;
@@ -564,18 +665,41 @@ export function renderBarChart(containerId, bars) {
   const svg = svgEl('svg', {
     viewBox: `0 0 ${svgWidth} ${totalHeight}`,
     'aria-label': 'Bar chart comparing emission values',
-    role: 'img'
+    role: 'img',
   });
 
   // Defs
   const defs = svgEl('defs');
 
   // Shadow filter
-  const filter = svgEl('filter', { id: `${chartId}-barshadow`, x: '-5%', y: '-20%', width: '110%', height: '160%' });
-  const feGauss = svgEl('feGaussianBlur', { in: 'SourceAlpha', stdDeviation: '2', result: 'blur' });
-  const feOff = svgEl('feOffset', { in: 'blur', dx: '0', dy: '1', result: 'shifted' });
-  const feFlood = svgEl('feFlood', { 'flood-color': 'rgba(0,0,0,0.1)', result: 'color' });
-  const feComp = svgEl('feComposite', { in: 'color', in2: 'shifted', operator: 'in', result: 'shadow' });
+  const filter = svgEl('filter', {
+    id: `${chartId}-barshadow`,
+    x: '-5%',
+    y: '-20%',
+    width: '110%',
+    height: '160%',
+  });
+  const feGauss = svgEl('feGaussianBlur', {
+    in: 'SourceAlpha',
+    stdDeviation: '2',
+    result: 'blur',
+  });
+  const feOff = svgEl('feOffset', {
+    in: 'blur',
+    dx: '0',
+    dy: '1',
+    result: 'shifted',
+  });
+  const feFlood = svgEl('feFlood', {
+    'flood-color': 'rgba(0,0,0,0.1)',
+    result: 'color',
+  });
+  const feComp = svgEl('feComposite', {
+    in: 'color',
+    in2: 'shifted',
+    operator: 'in',
+    result: 'shadow',
+  });
   const feMerge = svgEl('feMerge');
   feMerge.appendChild(svgEl('feMergeNode', { in: 'shadow' }));
   feMerge.appendChild(svgEl('feMergeNode', { in: 'SourceGraphic' }));
@@ -601,7 +725,7 @@ export function renderBarChart(containerId, bars) {
       'text-anchor': 'end',
       'font-size': '14',
       'font-weight': '600',
-      fill: '#f8fafc'
+      fill: '#f8fafc',
     });
     label.textContent = bar.label;
     svg.appendChild(label);
@@ -613,7 +737,7 @@ export function renderBarChart(containerId, bars) {
       width: barAreaWidth,
       height: barHeight - 8,
       rx: (barHeight - 8) / 2,
-      fill: 'rgba(255, 255, 255, 0.1)'
+      fill: 'rgba(255, 255, 255, 0.1)',
     });
     svg.appendChild(track);
 
@@ -627,7 +751,10 @@ export function renderBarChart(containerId, bars) {
       fill: `url(#${chartId}-bar${i}-linear)`,
       filter: `url(#${chartId}-barshadow)`,
       'data-label': bar.label,
-      'data-value': bar.value.toFixed(2)
+      'data-value': bar.value.toFixed(2),
+      tabindex: '0',
+      role: 'button',
+      'aria-label': `${bar.label}: ${bar.value.toFixed(2)} tons CO₂e`,
     });
     rect.classList.add('bar-rect');
 
@@ -647,7 +774,7 @@ export function renderBarChart(containerId, bars) {
       'text-anchor': 'start',
       'font-size': '15',
       'font-weight': '700',
-      fill: '#f8fafc'
+      fill: '#f8fafc',
     });
     value.textContent = `${bar.value.toFixed(1)}t`;
     svg.appendChild(value);
@@ -659,12 +786,33 @@ export function renderBarChart(containerId, bars) {
   const tooltip = createTooltip(container);
   svg.addEventListener('mousemove', (e) => {
     const target = e.target.closest('.bar-rect');
-    if (!target) { tooltip.hide(); return; }
-    tooltip.show(e.clientX, e.clientY,
+    if (!target) {
+      tooltip.hide();
+      return;
+    }
+    tooltip.show(
+      e.clientX,
+      e.clientY,
       `<strong>${target.getAttribute('data-label')}</strong><br>${target.getAttribute('data-value')} tons CO₂e`
     );
   });
   svg.addEventListener('mouseleave', () => tooltip.hide());
+
+  // Keyboard navigation for tooltip
+  svg.addEventListener('focusin', (e) => {
+    const target = e.target.closest('.bar-rect');
+    if (!target) return;
+    const elRect = target.getBoundingClientRect();
+    tooltip.show(
+      elRect.left + elRect.width / 2,
+      elRect.top + elRect.height / 2,
+      `<strong>${target.getAttribute('data-label')}</strong><br>${target.getAttribute('data-value')} tons CO₂e`
+    );
+  });
+  svg.addEventListener('focusout', () => tooltip.hide());
+  svg.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') tooltip.hide();
+  });
 
   // ── Accessible Data Table Fallback ────────────────────────────────────
   const table = document.createElement('table');
@@ -678,12 +826,16 @@ export function renderBarChart(containerId, bars) {
       </tr>
     </thead>
     <tbody>
-      ${bars.map(b => `
+      ${bars
+        .map(
+          (b) => `
         <tr>
           <td>${b.label}</td>
           <td>${b.value.toFixed(2)}</td>
         </tr>
-      `).join('')}
+      `
+        )
+        .join('')}
     </tbody>
   `;
   container.appendChild(table);
@@ -702,11 +854,19 @@ export function renderBarChart(containerId, bars) {
  * @param {number} nationalAvg – National average (tons)
  * @param {number} safeTarget  – Paris Agreement safe target (tons)
  */
-export function renderComparisonGauge(containerId, userValue, nationalAvg, safeTarget) {
+export function renderComparisonGauge(
+  containerId,
+  userValue,
+  nationalAvg,
+  safeTarget
+) {
   _injectStyles();
 
   const container = document.getElementById(containerId);
-  if (!container) { console.warn(`renderComparisonGauge: container #${containerId} not found`); return; }
+  if (!container) {
+    console.warn(`renderComparisonGauge: container #${containerId} not found`);
+    return;
+  }
 
   container.innerHTML = '';
   container.classList.add('eco-chart-container');
@@ -729,29 +889,46 @@ export function renderComparisonGauge(containerId, userValue, nationalAvg, safeT
   const svg = svgEl('svg', {
     viewBox: `0 0 ${svgWidth} ${svgHeight}`,
     'aria-label': `Gauge comparing your footprint (${userValue.toFixed(1)}t) to national average (${nationalAvg}t) and safe target (${safeTarget}t)`,
-    role: 'img'
+    role: 'img',
   });
 
   // Defs
   const defs = svgEl('defs');
 
   // Track gradient (green → yellow → red)
-  const trackGrad = svgEl('linearGradient', { id: `${chartId}-track`, x1: '0', y1: '0', x2: '1', y2: '0' });
+  const trackGrad = svgEl('linearGradient', {
+    id: `${chartId}-track`,
+    x1: '0',
+    y1: '0',
+    x2: '1',
+    y2: '0',
+  });
   const tStops = [
     { offset: '0%', color: '#22c55e' },
     { offset: '25%', color: '#84cc16' },
     { offset: '50%', color: '#eab308' },
     { offset: '75%', color: '#f97316' },
-    { offset: '100%', color: '#ef4444' }
+    { offset: '100%', color: '#ef4444' },
   ];
-  tStops.forEach(s => {
-    trackGrad.appendChild(svgEl('stop', { offset: s.offset, 'stop-color': s.color }));
+  tStops.forEach((s) => {
+    trackGrad.appendChild(
+      svgEl('stop', { offset: s.offset, 'stop-color': s.color })
+    );
   });
   defs.appendChild(trackGrad);
 
   // Glow filter for user marker
-  const glow = svgEl('filter', { id: `${chartId}-glow`, x: '-50%', y: '-50%', width: '200%', height: '200%' });
-  const feGauss = svgEl('feGaussianBlur', { stdDeviation: '3', result: 'glow' });
+  const glow = svgEl('filter', {
+    id: `${chartId}-glow`,
+    x: '-50%',
+    y: '-50%',
+    width: '200%',
+    height: '200%',
+  });
+  const feGauss = svgEl('feGaussianBlur', {
+    stdDeviation: '3',
+    result: 'glow',
+  });
   const feMerge = svgEl('feMerge');
   feMerge.appendChild(svgEl('feMergeNode', { in: 'glow' }));
   feMerge.appendChild(svgEl('feMergeNode', { in: 'SourceGraphic' }));
@@ -763,31 +940,36 @@ export function renderComparisonGauge(containerId, userValue, nationalAvg, safeT
 
   // ── Title ─────────────────────────────────────────────────────────────
   const title = svgEl('text', {
-    x: svgWidth / 2, y: 20,
+    x: svgWidth / 2,
+    y: 20,
     'text-anchor': 'middle',
     'font-size': '14',
     'font-weight': '600',
-    fill: '#334155'
+    fill: '#334155',
   });
   title.textContent = 'Your Footprint vs Benchmarks';
   svg.appendChild(title);
 
   // ── Track background ──────────────────────────────────────────────────
   const trackBg = svgEl('rect', {
-    x: trackPadX, y: trackY,
-    width: trackWidth, height: trackHeight,
+    x: trackPadX,
+    y: trackY,
+    width: trackWidth,
+    height: trackHeight,
     rx: trackHeight / 2,
-    fill: '#e2e8f0'
+    fill: '#e2e8f0',
   });
   svg.appendChild(trackBg);
 
   // ── Coloured track ────────────────────────────────────────────────────
   const trackFill = svgEl('rect', {
-    x: trackPadX, y: trackY,
-    width: trackWidth, height: trackHeight,
+    x: trackPadX,
+    y: trackY,
+    width: trackWidth,
+    height: trackHeight,
     rx: trackHeight / 2,
     fill: `url(#${chartId}-track)`,
-    opacity: '0.6'
+    opacity: '0.6',
   });
   svg.appendChild(trackFill);
 
@@ -795,20 +977,23 @@ export function renderComparisonGauge(containerId, userValue, nationalAvg, safeT
   const safeX = toX(safeTarget);
 
   const safeLine = svgEl('line', {
-    x1: safeX, y1: trackY - 8,
-    x2: safeX, y2: trackY + trackHeight + 8,
+    x1: safeX,
+    y1: trackY - 8,
+    x2: safeX,
+    y2: trackY + trackHeight + 8,
     stroke: '#16a34a',
     'stroke-width': '2.5',
-    'stroke-dasharray': '4 2'
+    'stroke-dasharray': '4 2',
   });
   svg.appendChild(safeLine);
 
   const safeLabel = svgEl('text', {
-    x: safeX, y: trackY + trackHeight + 26,
+    x: safeX,
+    y: trackY + trackHeight + 26,
     'text-anchor': 'middle',
     'font-size': '11',
     'font-weight': '600',
-    fill: '#16a34a'
+    fill: '#16a34a',
   });
   safeLabel.textContent = `🎯 Safe: ${safeTarget}t`;
   svg.appendChild(safeLabel);
@@ -817,20 +1002,23 @@ export function renderComparisonGauge(containerId, userValue, nationalAvg, safeT
   const natX = toX(nationalAvg);
 
   const natLine = svgEl('line', {
-    x1: natX, y1: trackY - 8,
-    x2: natX, y2: trackY + trackHeight + 8,
+    x1: natX,
+    y1: trackY - 8,
+    x2: natX,
+    y2: trackY + trackHeight + 8,
     stroke: '#6366f1',
     'stroke-width': '2.5',
-    'stroke-dasharray': '4 2'
+    'stroke-dasharray': '4 2',
   });
   svg.appendChild(natLine);
 
   const natLabel = svgEl('text', {
-    x: natX, y: trackY - 16,
+    x: natX,
+    y: trackY - 16,
     'text-anchor': 'middle',
     'font-size': '11',
     'font-weight': '600',
-    fill: '#6366f1'
+    fill: '#6366f1',
   });
   natLabel.textContent = `🌍 Avg: ${nationalAvg}t`;
   svg.appendChild(natLabel);
@@ -847,7 +1035,7 @@ export function renderComparisonGauge(containerId, userValue, nationalAvg, safeT
     stroke: _getUserColor(userValue, safeTarget, nationalAvg),
     'stroke-width': '2',
     opacity: '0.35',
-    filter: `url(#${chartId}-glow)`
+    filter: `url(#${chartId}-glow)`,
   });
   userGlow.classList.add('gauge-marker');
   svg.appendChild(userGlow);
@@ -860,7 +1048,7 @@ export function renderComparisonGauge(containerId, userValue, nationalAvg, safeT
     fill: _getUserColor(userValue, safeTarget, nationalAvg),
     stroke: 'white',
     'stroke-width': '3',
-    filter: `url(#${chartId}-glow)`
+    filter: `url(#${chartId}-glow)`,
   });
   userDot.classList.add('gauge-marker');
   svg.appendChild(userDot);
@@ -872,7 +1060,7 @@ export function renderComparisonGauge(containerId, userValue, nationalAvg, safeT
     'text-anchor': 'middle',
     'font-size': '15',
     'font-weight': '700',
-    fill: _getUserColor(userValue, safeTarget, nationalAvg)
+    fill: _getUserColor(userValue, safeTarget, nationalAvg),
   });
   userLabel.textContent = `You: ${userValue.toFixed(1)}t`;
   userLabel.classList.add('gauge-marker');
@@ -889,19 +1077,21 @@ export function renderComparisonGauge(containerId, userValue, nationalAvg, safeT
 
   // ── Scale labels ──────────────────────────────────────────────────────
   const scaleStart = svgEl('text', {
-    x: trackPadX, y: trackY + trackHeight + 38,
+    x: trackPadX,
+    y: trackY + trackHeight + 38,
     'text-anchor': 'middle',
     'font-size': '10',
-    fill: '#94a3b8'
+    fill: '#94a3b8',
   });
   scaleStart.textContent = '0t';
   svg.appendChild(scaleStart);
 
   const scaleEnd = svgEl('text', {
-    x: trackPadX + trackWidth, y: trackY + trackHeight + 38,
+    x: trackPadX + trackWidth,
+    y: trackY + trackHeight + 38,
     'text-anchor': 'middle',
     'font-size': '10',
-    fill: '#94a3b8'
+    fill: '#94a3b8',
   });
   scaleEnd.textContent = `${scaleMax.toFixed(0)}t`;
   svg.appendChild(scaleEnd);

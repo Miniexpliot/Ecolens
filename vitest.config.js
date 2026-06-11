@@ -7,7 +7,7 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'html'],
       include: ['js/**/*.js'],
-      exclude: ['js/app.js', 'js/components/**', 'js/router.js', 'js/tests.test.js', 'js/types.js', 'js/constants.js'],
+      exclude: ['js/app.js', 'js/types.js', 'js/components/background-3d.js'],
       all: true
     }
   }

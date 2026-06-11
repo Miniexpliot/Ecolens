@@ -8,7 +8,11 @@
  * @module ai-engine
  */
 
-import { SAFE_TARGET, NATIONAL_AVERAGES, CATEGORY_LABELS } from './constants.js';
+import {
+  SAFE_TARGET,
+  NATIONAL_AVERAGES,
+  CATEGORY_LABELS,
+} from './constants.js';
 import { calculatePercentages } from './calculations.js';
 
 // ---------------------------------------------------------------------------
@@ -28,7 +32,8 @@ import { calculatePercentages } from './calculations.js';
 export function generateReport(emissions, inputs) {
   const percentages = calculatePercentages(emissions);
   const country = inputs.country || 'United States';
-  const nationalAvg = NATIONAL_AVERAGES[country] || NATIONAL_AVERAGES['World Average'];
+  const nationalAvg =
+    NATIONAL_AVERAGES[country] || NATIONAL_AVERAGES['World Average'];
   const safeTarget = SAFE_TARGET;
 
   // ── Sort categories by descending impact ──────────────────────────────
@@ -36,7 +41,11 @@ export function generateReport(emissions, inputs) {
     { key: 'travel', value: emissions.travel, label: CATEGORY_LABELS.travel },
     { key: 'home', value: emissions.home, label: CATEGORY_LABELS.home },
     { key: 'diet', value: emissions.diet, label: CATEGORY_LABELS.diet },
-    { key: 'shopping', value: emissions.shopping, label: CATEGORY_LABELS.shopping }
+    {
+      key: 'shopping',
+      value: emissions.shopping,
+      label: CATEGORY_LABELS.shopping,
+    },
   ].sort((a, b) => b.value - a.value);
 
   const primary = categories[0];
@@ -64,14 +73,16 @@ export function generateReport(emissions, inputs) {
 
   // ── National & safe-target comparisons ────────────────────────────────
   const vsNational = emissions.total - nationalAvg;
-  const vsNationalText = vsNational > 0
-    ? `${Math.abs(vsNational).toFixed(1)} tons above`
-    : `${Math.abs(vsNational).toFixed(1)} tons below`;
+  const vsNationalText =
+    vsNational > 0
+      ? `${Math.abs(vsNational).toFixed(1)} tons above`
+      : `${Math.abs(vsNational).toFixed(1)} tons below`;
 
   const vsTarget = emissions.total - safeTarget;
-  const vsTargetText = vsTarget > 0
-    ? `${vsTarget.toFixed(1)} tons above`
-    : 'You are within the safe zone!';
+  const vsTargetText =
+    vsTarget > 0
+      ? `${vsTarget.toFixed(1)} tons above`
+      : 'You are within the safe zone!';
 
   // ── Summary paragraph ─────────────────────────────────────────────────
   const summary =
@@ -94,19 +105,19 @@ export function generateReport(emissions, inputs) {
   if (inputs.travel.carType === 'gas' && inputs.travel.commuteDistance > 10) {
     insights.push(
       `Your ${inputs.travel.commuteDistance}-mile daily commute in a gasoline vehicle is a ` +
-      `significant emission source. Switching to a hybrid could save approximately ` +
-      `${(emissions.travel * 0.45).toFixed(1)} tons annually.`
+        `significant emission source. Switching to a hybrid could save approximately ` +
+        `${(emissions.travel * 0.45).toFixed(1)} tons annually.`
     );
   } else if (inputs.travel.carType === 'ev') {
     insights.push(
       'Great choice driving an EV! Your transportation emissions are significantly ' +
-      'lower than the national average.'
+        'lower than the national average.'
     );
   }
   if (inputs.travel.transitFrequency >= 3) {
     insights.push(
       `Your frequent use of public transit (${inputs.travel.transitFrequency} days/week) ` +
-      'is already helping reduce your transportation footprint.'
+        'is already helping reduce your transportation footprint.'
     );
   }
 
@@ -114,18 +125,18 @@ export function generateReport(emissions, inputs) {
   if (inputs.home.renewableEnergy === 'none') {
     insights.push(
       'Switching to a renewable energy provider could reduce your home energy emissions ' +
-      `by up to 90%, saving approximately ${(emissions.home * 0.9).toFixed(1)} tons per year.`
+        `by up to 90%, saving approximately ${(emissions.home * 0.9).toFixed(1)} tons per year.`
     );
   } else if (inputs.home.renewableEnergy === 'full') {
     insights.push(
       'Powering your home with 100% renewable energy is one of the most impactful ' +
-      'choices you can make. Well done!'
+        'choices you can make. Well done!'
     );
   }
   if (inputs.home.heatingCooling === 'heavy') {
     insights.push(
       'Heavy heating/cooling usage is a major energy consumer. Even reducing by 2°F ' +
-      'can save 6-8% on energy bills and emissions.'
+        'can save 6-8% on energy bills and emissions.'
     );
   }
 
@@ -133,18 +144,18 @@ export function generateReport(emissions, inputs) {
   if (inputs.diet.meatConsumption === 'daily') {
     insights.push(
       `Daily meat consumption contributes approximately ${emissions.diet.toFixed(1)} tons ` +
-      'to your footprint. Reducing to 1-2 times per week could save over 1 ton of CO₂e annually.'
+        'to your footprint. Reducing to 1-2 times per week could save over 1 ton of CO₂e annually.'
     );
   } else if (inputs.diet.meatConsumption === 'vegan') {
     insights.push(
       'Your plant-based diet is one of the lowest-impact food choices possible. ' +
-      'This alone saves over 2 tons compared to the average diet.'
+        'This alone saves over 2 tons compared to the average diet.'
     );
   }
   if (inputs.diet.composting === 'no') {
     insights.push(
       'Starting composting could divert organic waste from landfills, preventing ' +
-      'methane emissions and saving ~0.1 tons CO₂e per year.'
+        'methane emissions and saving ~0.1 tons CO₂e per year.'
     );
   }
 
@@ -152,7 +163,7 @@ export function generateReport(emissions, inputs) {
   if (inputs.shopping.fastFashion === 'high') {
     insights.push(
       'Frequent fast fashion purchases contribute significantly to emissions. ' +
-      'The fashion industry accounts for ~10% of global carbon emissions.'
+        'The fashion industry accounts for ~10% of global carbon emissions.'
     );
   }
 
@@ -182,7 +193,7 @@ export function generateReport(emissions, inputs) {
     potentialSavings,
     projectedWithChanges,
     primarySource: primary,
-    secondarySource: secondary
+    secondarySource: secondary,
   };
 }
 
@@ -253,9 +264,12 @@ export function generateWelcomeMessage() {
  * @returns {string} The key of the highest-emitting category.
  */
 function _findHighestCategory(emissions) {
-  const categories = Object.keys(emissions).filter(k => k !== 'total');
+  const categories = Object.keys(emissions).filter((k) => k !== 'total');
   if (categories.length === 0) return 'travel';
-  return categories.reduce((a, b) => emissions[a] > emissions[b] ? a : b, categories[0]);
+  return categories.reduce(
+    (a, b) => (emissions[a] > emissions[b] ? a : b),
+    categories[0]
+  );
 }
 
 /**
@@ -284,28 +298,31 @@ async function simulateHttpFetch(query) {
  */
 export async function chatRespond(query, state) {
   const q = query.toLowerCase();
-  
+
   // General Knowledge (Always available)
-  if (q.includes('what is a carbon footprint') || q.includes('carbon footprint')) {
+  if (
+    q.includes('what is a carbon footprint') ||
+    q.includes('carbon footprint')
+  ) {
     return "A carbon footprint is the total amount of greenhouse gases (including carbon dioxide and methane) that are generated by our actions. It's usually measured in tons of CO₂ equivalent (CO₂e) per year.";
   }
   if (q.includes('climate change important') || q.includes('why care')) {
-    return "Climate change affects everything from extreme weather patterns to global food supplies. Reducing your personal footprint is a crucial step towards building a sustainable future!";
+    return 'Climate change affects everything from extreme weather patterns to global food supplies. Reducing your personal footprint is a crucial step towards building a sustainable future!';
   }
-  
+
   if (!state.reportGenerated) {
     return "I'd love to give you personalized advice, but you need to complete the calculator first so I can analyze your data!";
   }
-  
+
   // Simulate HTTP fetch with robust error handling for HTTP timeouts and missing HTML tags
   try {
     await simulateHttpFetch(q);
   } catch (error) {
     if (error.message === 'Timeout') {
-      return "⚠️ Network Error: The HTTP request timed out while connecting to the AI service. Please try again.";
+      return '⚠️ Network Error: The HTTP request timed out while connecting to the AI service. Please try again.';
     }
     if (error.message === 'Missing HTML tags') {
-      return "⚠️ Parsing Error: The response was missing expected HTML tags. The layout could not be parsed.";
+      return '⚠️ Parsing Error: The response was missing expected HTML tags. The layout could not be parsed.';
     }
     return `⚠️ Error: ${error.message}`;
   }
@@ -316,7 +333,13 @@ export async function chatRespond(query, state) {
   const nationalAvg = NATIONAL_AVERAGES[i.country || 'United States'] || 15;
 
   // Question 1: How can I reduce my [highest] emissions?
-  if (q.includes('reduce') && (q.includes('travel') || q.includes('home') || q.includes('diet') || q.includes('shopping'))) {
+  if (
+    q.includes('reduce') &&
+    (q.includes('travel') ||
+      q.includes('home') ||
+      q.includes('diet') ||
+      q.includes('shopping'))
+  ) {
     if (q.includes('travel')) {
       return `Your travel footprint is **${e.travel.toFixed(1)}t** (${p.travel}% of your total). Since you drive a ${i.travel.carType} car ${i.travel.commuteDistance} miles a day, switching to an EV or carpooling 3 days a week could cut this by nearly half!`;
     }
@@ -342,38 +365,56 @@ export async function chatRespond(query, state) {
 
   // Question 3: What is the easiest way to save 1 ton of CO2?
   if (q.includes('1 ton') || q.includes('easiest way')) {
-    let bestAction = "Switching your home energy to a 100% renewable plan";
+    let bestAction = 'Switching your home energy to a 100% renewable plan';
     if (e.travel > 3 && i.travel.carType === 'gas') {
-      bestAction = "Replacing your gas car with a hybrid or EV";
+      bestAction = 'Replacing your gas car with a hybrid or EV';
     } else if (e.diet > 2 && i.diet.meatConsumption === 'daily') {
-      bestAction = "Eating fully plant-based just 3 days a week";
+      bestAction = 'Eating fully plant-based just 3 days a week';
     }
     return `The single most impactful thing you could do based on your profile is: **${bestAction}**. That alone would save you over 1 ton of CO₂e per year!`;
   }
 
   // Fallback responses
   if (q.includes('meat') || q.includes('diet') || q.includes('food')) {
-    if (i.diet.meatConsumption === 'daily' || i.diet.meatConsumption === 'frequently') {
+    if (
+      i.diet.meatConsumption === 'daily' ||
+      i.diet.meatConsumption === 'frequently'
+    ) {
       return `Your diet contributes ${e.diet.toFixed(1)} tons to your footprint, which is **${p.diet}%** of your total emissions! Reducing meat to 1-2 times a week could save over 1 ton of CO₂e annually.`;
     }
     return `Your diet footprint is relatively low at ${e.diet.toFixed(1)} tons. Keep focusing on plant-based and locally sourced foods!`;
   }
 
-  if (q.includes('car') || q.includes('drive') || q.includes('travel') || q.includes('commute')) {
+  if (
+    q.includes('car') ||
+    q.includes('drive') ||
+    q.includes('travel') ||
+    q.includes('commute')
+  ) {
     if (i.travel.carType === 'gas') {
       return `Your daily ${i.travel.commuteDistance}-mile commute in a gas car adds up to ${e.travel.toFixed(1)} tons (**${p.travel}%** of your total). Switching to an EV or hybrid is your #1 way to drop emissions.`;
     }
     return `Your travel footprint is ${e.travel.toFixed(1)} tons (${p.travel}% of total). You're already making smart choices! Try adding an extra day of walking, biking, or transit to lower it even more.`;
   }
 
-  if (q.includes('home') || q.includes('energy') || q.includes('power') || q.includes('electricity')) {
+  if (
+    q.includes('home') ||
+    q.includes('energy') ||
+    q.includes('power') ||
+    q.includes('electricity')
+  ) {
     if (i.home.renewableEnergy === 'none') {
       return `Home energy accounts for ${e.home.toFixed(1)} tons (**${p.home}%** of your footprint). Switching to a renewable energy provider is the easiest way to cut this down significantly without changing your habits.`;
     }
     return `Since you already use renewable energy, your home emissions are relatively low (${e.home.toFixed(1)} tons, ${p.home}% of total). Focus on unplugging unused appliances to save a bit more.`;
   }
 
-  if (q.includes('reduce') || q.includes('improve') || q.includes('help') || q.includes('advice')) {
+  if (
+    q.includes('reduce') ||
+    q.includes('improve') ||
+    q.includes('help') ||
+    q.includes('advice')
+  ) {
     const highest = _findHighestCategory(e);
     return `Your highest emission category is **${highest}** (${e[highest].toFixed(1)} tons, which is **${p[highest]}%** of your total). Check your Action Plan for specific ways to target this area!`;
   }
@@ -386,4 +427,3 @@ export async function chatRespond(query, state) {
   const fallbackHighest = _findHighestCategory(e);
   return `That's an interesting question! Based on your footprint of ${e.total.toFixed(1)} tons, your biggest opportunity for improvement is in the **${fallbackHighest}** category. Let me know if you want to dive into that!`;
 }
-

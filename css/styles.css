@@ -3102,3 +3102,134 @@ input[type="range"]::-webkit-slider-thumb:hover {
     font-size: clamp(2rem, 8vw, 2.5rem);
   }
 }
+
+/* ============================================================
+   31. ADDITIONAL ACCESSIBILITY & QUALITY REFACTOR STYLES
+   ============================================================ */
+
+/* Custom focus accessibility styles */
+.radio-card input:focus + .radio-card__visual,
+.radio-card:focus-within .radio-card__visual {
+  box-shadow: var(--focus-ring);
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* CSS rules replacing inline styles */
+.results-welcome-card {
+  margin-top: 2rem;
+}
+.results-welcome-link {
+  margin-top: 1rem;
+}
+
+.action-plan__header-desc {
+  color: var(--text-secondary);
+}
+.action-plan-empty-card {
+  text-align: center;
+  padding: var(--space-2xl);
+}
+.action-plan-empty-text {
+  color: var(--text-muted);
+}
+
+.calculator-header-desc {
+  color: var(--text-secondary);
+}
+.calculator__step-desc {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+.calculator__summary-title {
+  margin-bottom: var(--space-sm);
+  color: var(--text-secondary);
+}
+.calculator__summary-group-title--travel {
+  color: var(--color-travel);
+}
+.calculator__summary-group-title--home {
+  color: var(--color-home);
+}
+.calculator__summary-group-title--diet {
+  color: var(--color-diet);
+}
+.calculator__summary-group-title--shopping {
+  color: var(--color-shopping);
+}
+
+.climate101__section-icon--danger {
+  background: rgba(239, 68, 68, 0.15);
+}
+.climate101__impact-icon--blue {
+  background: rgba(59, 130, 246, 0.15);
+}
+.climate101__section-icon--cyan {
+  background: rgba(6, 182, 212, 0.15);
+}
+.climate101__section-card {
+  margin-bottom: var(--space-xl);
+}
+.climate101__section-subtitle {
+  margin-bottom: var(--space-lg);
+  color: var(--text-secondary);
+}
+.climate101__section-icon--warning {
+  background: rgba(245, 158, 11, 0.15);
+}
+.climate101__cta-container {
+  text-align: center;
+  margin-top: var(--space-2xl);
+}
+
+.report-header-desc {
+  color: var(--text-secondary);
+}
+.ai-panel__header-rating {
+  margin-left: auto;
+}
+.ai-panel__insights-title {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: var(--space-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.ai-panel__savings-card {
+  margin-top: var(--space-md);
+  background: rgba(16, 185, 129, 0.05);
+  border-color: rgba(16, 185, 129, 0.15);
+}
+.ai-panel__savings-title {
+  color: var(--color-primary);
+  font-size: 0.9rem;
+  margin-bottom: var(--space-sm);
+}
+.ai-panel__savings-text {
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+.report-card-title {
+  margin-bottom: var(--space-lg);
+  font-size: 1.1rem;
+}
+.comparison-section-details {
+  margin-top: var(--space-lg);
+}
+.projected-score-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: var(--space-lg);
+}
+
+.chart-error-card {
+  text-align: center;
+  padding: 2rem;
+}
+.chart-error-title {
+  color: var(--color-danger);
+  margin-bottom: 0.5rem;
+}
+.chart-error-text {
+  color: #94a3b8;
+}
