@@ -10,7 +10,10 @@
  */
 
 import { Store } from '../state.js';
-import { CATEGORY_COLORS, CATEGORY_LABELS } from '../constants.js';
+import { SAFE_TARGET, CATEGORY_COLORS, CATEGORY_LABELS } from '../constants.js';
+import { generateReport } from '../ai-engine.js';
+import { renderBarChart, renderComparisonGauge } from '../charts.js';
+import { sanitizeSafeHTML } from '../sanitize.js';
 
 /**
  * Render the interactive action plan.
@@ -125,8 +128,8 @@ function buildActionCard(action, isChecked) {
       </div>
     </label>
     <div class="action-item__content">
-      <div class="action-item__title">${escapeHTML(action.title)}</div>
-      <div class="action-item__description">${escapeHTML(action.description)}</div>
+      <div class="action-item__title">${sanitizeSafeHTML(action.title)}</div>
+      <div class="action-item__description">${sanitizeSafeHTML(action.description)}</div>
     </div>
     <div class="action-item__savings" aria-label="Saves ${action.savingsTons.toFixed(2)} tons per year">
       Save ${action.savingsTons.toFixed(2)}t/yr
@@ -158,13 +161,16 @@ function buildActionCard(action, isChecked) {
 function groupByCategory(actions) {
   const groups = {};
   actions.forEach((action) => {
+    const report = generateReport(action);
     const cat = action.category || 'other';
+    const label = `${report.ratingEmoji || '📊'} ${sanitizeSafeHTML(report.rating || 'Average')}`;
     if (!groups[cat]) groups[cat] = [];
     groups[cat].push(action);
   });
   return groups;
 }
 
+// Deprecated: keep for backward compatibility, but prefer sanitizeSafeHTML
 function escapeHTML(str) {
   if (!str) return '';
   const div = document.createElement('div');
