@@ -4,7 +4,7 @@
  * climate science, the Paris Agreement, and actionable tips.
  */
 
-import { NATIONAL_AVERAGES, SAFE_TARGET } from '../constants.js';
+import { SAFE_TARGET } from '../constants.js';
 
 /**
  * Render the complete Climate 101 educational section.

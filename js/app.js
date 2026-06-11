@@ -15,7 +15,8 @@ import { renderActionPlan } from './components/action-plan.js';
 import { renderDebugPanel, initDebugShortcut } from './components/debug-panel.js';
 import { init3DBackground } from './components/background-3d.js';
 import { renderChatWidget } from './components/chat-widget.js';
-import { runAllTests } from './tests.js';
+import { updateProjectedScore, updateActionMetrics } from './components/results-updater.js';
+import { initScrollObserver, observeScrollElements } from './components/scroll-observer.js';
 
 /* ── DOM References ─────────────────────────────────────────── */
 const appRoot = document.getElementById('app-root');
@@ -31,33 +32,12 @@ const viewRenderers = {
 /* ── Previous view for diff-checking ────────────────────────── */
 let previousView = null;
 
-/* ── Intersection Observer for scroll animations ────────────── */
-let scrollObserver = null;
-
-function initScrollObserver() {
-  if (scrollObserver) {
-    scrollObserver.disconnect();
-  }
-  scrollObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-          scrollObserver.unobserve(entry.target);
-        }
-      });
-    },
-    { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
-  );
-}
-
-function observeScrollElements(container) {
-  if (!scrollObserver) return;
-  const elements = container.querySelectorAll('.animate-on-scroll');
-  elements.forEach(el => scrollObserver.observe(el));
-}
-
 /* ── View Render Functions ──────────────────────────────────── */
+
+/**
+ * Renders the Home view fragment.
+ * @returns {DocumentFragment}
+ */
 
 function renderHome() {
   const fragment = document.createDocumentFragment();
@@ -65,18 +45,31 @@ function renderHome() {
   return fragment;
 }
 
+/**
+ * Renders the Climate 101 educational view fragment.
+ * @returns {DocumentFragment}
+ */
 function renderClimate101View() {
   const fragment = document.createDocumentFragment();
   fragment.appendChild(renderClimate101());
   return fragment;
 }
 
+/**
+ * Renders the Calculator multi-step form view fragment.
+ * @returns {DocumentFragment}
+ */
 function renderCalculatorView() {
   const fragment = document.createDocumentFragment();
   fragment.appendChild(renderCalculator());
   return fragment;
 }
 
+/**
+ * Renders the Results dashboard view fragment.
+ * Handles the fallback welcome message if no report exists.
+ * @returns {DocumentFragment}
+ */
 function renderResultsView() {
   const state = Store.getState();
   const fragment = document.createDocumentFragment();
@@ -104,6 +97,12 @@ function renderResultsView() {
 
 /* ── Main Render Loop ───────────────────────────────────────── */
 
+/**
+ * Handles the main rendering logic for the application, transitioning
+ * between views and setting up root elements.
+ * 
+ * @param {import('./types.js').ApplicationState} state - Current application state
+ */
 function renderApp(state) {
   const currentView = state.currentView || 'home';
 
@@ -159,6 +158,13 @@ function renderApp(state) {
   }
 }
 
+/**
+ * Swaps the main content with the new view and manages entry animations.
+ * 
+ * @param {HTMLElement} mainContent - The main view container
+ * @param {string} currentView - The identifier of the new view
+ * @param {number} startTime - Performance timestamp for render metrics
+ */
 function swapContent(mainContent, currentView, startTime) {
   // Clear existing content
   mainContent.innerHTML = '';
@@ -187,6 +193,12 @@ function swapContent(mainContent, currentView, startTime) {
 
 /* ── Force Re-render (for results view live updates) ────────── */
 
+/**
+ * Subscribe callback triggered whenever the global Store changes.
+ * Either re-renders the full app or applies targeted DOM updates.
+ * 
+ * @param {import('./types.js').ApplicationState} state - Current application state
+ */
 function handleStoreUpdate(state) {
   const currentView = state.currentView || 'home';
 
@@ -209,45 +221,6 @@ function handleStoreUpdate(state) {
   renderApp(state);
 }
 
-function updateProjectedScore(state, container) {
-  const currentVal = container.querySelector('[data-current]');
-  const savingsVal = container.querySelector('[data-savings]');
-  const projectedVal = container.querySelector('[data-projected]');
-
-  if (currentVal) {
-    currentVal.textContent = state.emissions.total.toFixed(2);
-  }
-  if (savingsVal) {
-    savingsVal.textContent = state.totalSavings.toFixed(2);
-    savingsVal.style.animation = 'numberChange 0.4s ease';
-    setTimeout(() => { savingsVal.style.animation = ''; }, 400);
-  }
-  if (projectedVal) {
-    const projected = state.projectedScore;
-    projectedVal.textContent = projected.toFixed(2);
-    projectedVal.className = 'projected-score__value';
-    projectedVal.classList.add(projected <= 2.5 ? 'projected-score__value--safe' : 'projected-score__value--danger');
-    projectedVal.style.animation = 'numberChange 0.4s ease';
-    setTimeout(() => { projectedVal.style.animation = ''; }, 400);
-  }
-}
-
-function updateActionMetrics(state, container) {
-  const potentialEl = container.querySelector('[data-potential]');
-  const projectedMetricEl = container.querySelector('[data-projected-metric]');
-  const countEl = container.querySelector('[data-count]');
-
-  if (potentialEl) {
-    potentialEl.textContent = state.totalSavings.toFixed(2);
-  }
-  if (projectedMetricEl) {
-    projectedMetricEl.textContent = state.projectedScore.toFixed(2);
-  }
-  if (countEl) {
-    countEl.textContent = state.checkedActions.size;
-  }
-}
-
 /* ── Initialisation ─────────────────────────────────────────── */
 
 function init() {
@@ -262,13 +235,6 @@ function init() {
 
   // Initialize 3D interactive background
   init3DBackground();
-
-  // Expose Test Suite to evaluators
-  window.runEcoLensTests = () => {
-    runAllTests().then(res => {
-      console.log('Testing complete.');
-    });
-  };
 
   // Perform initial render
   renderApp(Store.getState());

@@ -43,14 +43,49 @@ export function sanitizeText(value) {
 
 /**
  * Safely sets innerHTML with sanitized content.
- * Wraps the content through a sanitization pass.
+ * Uses DOMParser to build an inert DOM, strips dangerous tags and attributes
+ * (e.g., inline event handlers like onclick, javascript: URIs), and then 
+ * applies the safe content to the target element.
+ * 
  * @param {HTMLElement} element - Target DOM element
- * @param {string} html - HTML string (already constructed safely)
+ * @param {string} html - HTML string to be sanitized and injected
  */
 export function safeSetHTML(element, html) {
-  // We trust internally generated HTML but still strip script tags as defense-in-depth
-  const cleaned = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-  element.innerHTML = cleaned;
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const inertBody = doc.body;
+
+  const dangerousTags = ['script', 'iframe', 'object', 'embed', 'style', 'base'];
+  
+  const walk = (node) => {
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      const tagName = node.tagName.toLowerCase();
+      if (dangerousTags.includes(tagName)) {
+        node.remove();
+        return;
+      }
+      
+      const attrs = Array.from(node.attributes);
+      for (const attr of attrs) {
+        const name = attr.name.toLowerCase();
+        const value = attr.value.toLowerCase();
+        // Remove inline event handlers and javascript: URIs
+        if (name.startsWith('on') || value.includes('javascript:')) {
+          node.removeAttribute(attr.name);
+        }
+      }
+    }
+    
+    // Create a static array of children to iterate over safely while removing nodes
+    const children = Array.from(node.childNodes);
+    for (const child of children) {
+      walk(child);
+    }
+  };
+
+  walk(inertBody);
+  
+  element.innerHTML = inertBody.innerHTML;
 }
 
 // ---------------------------------------------------------------------------

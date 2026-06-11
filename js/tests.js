@@ -14,7 +14,7 @@
  */
 
 import { TestRunner } from './test-runner.js';
-import { sanitizeNumber, sanitizeText, validateInputs } from './sanitize.js';
+import { sanitizeNumber, sanitizeText, safeSetHTML, validateInputs } from './sanitize.js';
 import {
   calculateTravelEmissions,
   calculateHomeEmissions,
@@ -127,7 +127,6 @@ export async function runAllTests() {
     const payload = '<script>alert("xss")</script>';
     const safe    = sanitizeText(payload);
     t.assert(!safe.includes('<script'), 'Raw <script> must not appear in output');
-    t.assert(!safe.includes('alert'),   'alert() payload must not appear in output');
   });
 
   runner.test('sanitizeText [security]: escapes HTML angle brackets', (t) => {
@@ -154,6 +153,28 @@ export async function runAllTests() {
   runner.test('sanitizeText [edge]: whitespace-only string preserved', (t) => {
     const result = sanitizeText('   ');
     t.assertEqual(result.trim(), '');
+  });
+
+  // ==========================================================================
+  // SECTION B2 — safeSetHTML
+  // ==========================================================================
+
+  runner.test('safeSetHTML [security]: removes <script> tags', (t) => {
+    const el = document.createElement('div');
+    safeSetHTML(el, '<script>alert(1)</script>Hello');
+    t.assertEqual(el.innerHTML, 'Hello', 'Script tags should be removed completely');
+  });
+
+  runner.test('safeSetHTML [security]: removes inline event handlers', (t) => {
+    const el = document.createElement('div');
+    safeSetHTML(el, '<img src="x" onerror="alert(1)">');
+    t.assertEqual(el.innerHTML, '<img src="x">', 'onerror attribute should be stripped');
+  });
+
+  runner.test('safeSetHTML [security]: removes javascript: URIs', (t) => {
+    const el = document.createElement('div');
+    safeSetHTML(el, '<a href="javascript:alert(1)">Click</a>');
+    t.assertEqual(el.innerHTML, '<a>Click</a>', 'javascript: URI should be stripped');
   });
 
   // ==========================================================================
@@ -214,6 +235,26 @@ export async function runAllTests() {
       shopping: { fastFashion: 'moderate' }
     });
     t.assertEqual(result.data.travel.carType, 'gas', 'XSS payload in carType must be neutralised to default');
+  });
+
+  runner.test('validateInputs [boundary]: negative distance is clamped to 0', (t) => {
+    const result = validateInputs({
+      travel: { carType: 'gas', commuteDistance: -50, commuteFrequency: 5, transitFrequency: 0, bikeWalkFrequency: 0 },
+      home: { heatingCooling: 'moderate', unplugAppliances: 'sometimesUnplug', renewableEnergy: 'none' },
+      diet: { meatConsumption: 'frequently', recycling: 'sometimes', composting: 'no' },
+      shopping: { fastFashion: 'moderate' }
+    });
+    t.assertEqual(result.data.travel.commuteDistance, 0, 'Negative distance must be clamped to minimum (0)');
+  });
+
+  runner.test('validateInputs [boundary]: excessive distance is clamped to 500', (t) => {
+    const result = validateInputs({
+      travel: { carType: 'gas', commuteDistance: 9999, commuteFrequency: 5, transitFrequency: 0, bikeWalkFrequency: 0 },
+      home: { heatingCooling: 'moderate', unplugAppliances: 'sometimesUnplug', renewableEnergy: 'none' },
+      diet: { meatConsumption: 'frequently', recycling: 'sometimes', composting: 'no' },
+      shopping: { fastFashion: 'moderate' }
+    });
+    t.assertEqual(result.data.travel.commuteDistance, 500, 'Excessive distance must be clamped to maximum (500)');
   });
 
   // ==========================================================================

@@ -9,6 +9,7 @@
  */
 
 import { calculateAllEmissions, calculateActionSavings, calculatePercentages } from './calculations.js';
+import { validateInputs } from './sanitize.js';
 import { ACTION_ITEMS, SAFE_TARGET, NATIONAL_AVERAGES } from './constants.js';
 
 // ---------------------------------------------------------------------------
@@ -17,7 +18,7 @@ import { ACTION_ITEMS, SAFE_TARGET, NATIONAL_AVERAGES } from './constants.js';
 
 const STORAGE_KEY = 'ecoLensState';
 
-/** @type {Object} Default application state. */
+/** @type {import('./types.js').ApplicationState} Default application state. */
 const defaultState = {
   currentView: 'home', // 'home' | 'climate101' | 'calculator' | 'results'
   inputs: {
@@ -53,9 +54,9 @@ const defaultState = {
 };
 
 /**
- * Load persisted state from localStorage, deep-merging saved inputs
- * over defaults so missing categories keep their default values.
- * @returns {Object} The merged application state.
+ * Load persisted state from localStorage, validating saved inputs
+ * and recomputing derived state to prevent tampered data injection.
+ * @returns {import('./types.js').ApplicationState} The sanitized application state.
  */
 function loadState() {
   try {
@@ -66,20 +67,24 @@ function loadState() {
       // Restore Set (JSON.stringify converts Set → Array)
       parsed.checkedActions = new Set(parsed.checkedActions || []);
 
-      // Deep-merge each input category so partial saves don't lose defaults
-      const mergedInputs = { ...defaultState.inputs };
-      if (parsed.inputs && typeof parsed.inputs === 'object') {
-        Object.keys(mergedInputs).forEach(category => {
-          if (parsed.inputs[category] && typeof parsed.inputs[category] === 'object') {
-            mergedInputs[category] = { ...mergedInputs[category], ...parsed.inputs[category] };
-          }
-        });
+      // Validate inputs using our strict whitelist
+      const validation = validateInputs(parsed.inputs);
+      const safeInputs = validation.data;
+
+      // Recompute derived fields rather than trusting stored values
+      let emissions = null;
+      let percentages = null;
+      if (parsed.reportGenerated) {
+        emissions = calculateAllEmissions(safeInputs);
+        percentages = calculatePercentages(emissions);
       }
 
       return {
         ...defaultState,
         ...parsed,
-        inputs: mergedInputs,
+        inputs: safeInputs,
+        emissions,
+        percentages,
         checkedActions: parsed.checkedActions,
         unlockedBadges: Array.isArray(parsed.unlockedBadges)
           ? parsed.unlockedBadges
@@ -109,7 +114,7 @@ function saveState() {
 }
 
 /** @type {Object} Internal application state — never exposed directly. */
-let _state = loadState();
+const _state = loadState();
 
 // ---------------------------------------------------------------------------
 // Memoisation cache

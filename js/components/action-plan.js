@@ -8,29 +8,6 @@
 import { Store } from '../state.js';
 import { CATEGORY_COLORS, CATEGORY_LABELS } from '../constants.js';
 
-/* ── Category icon SVGs ──────────────────────────────────────── */
-const CATEGORY_ICONS = {
-  travel: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-    <circle cx="3.5" cy="11" r="1.5" stroke="currentColor" stroke-width="1" fill="none"/>
-    <circle cx="10.5" cy="11" r="1.5" stroke="currentColor" stroke-width="1" fill="none"/>
-    <path d="M2 9L3 6H8.5L10.5 9" stroke="currentColor" stroke-width="1" stroke-linecap="round" fill="none"/>
-    <line x1="2" y1="9" x2="12" y2="9" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
-  </svg>`,
-  home: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-    <path d="M2 7L7 2L12 7" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-    <path d="M3.5 6.5V12H6V9H8V12H10.5V6.5" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-  </svg>`,
-  diet: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-    <path d="M7 1.5C7 1.5 3 4.5 3 8C3 10.21 4.79 12 7 12C9.21 12 11 10.21 11 8C11 4.5 7 1.5 7 1.5Z" stroke="currentColor" stroke-width="1" fill="none"/>
-    <line x1="7" y1="5" x2="7" y2="10.5" stroke="currentColor" stroke-width="0.8" stroke-linecap="round"/>
-  </svg>`,
-  shopping: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-    <path d="M3 5H11L10 12H4L3 5Z" stroke="currentColor" stroke-width="1" stroke-linecap="round" fill="none"/>
-    <line x1="1.5" y1="5" x2="12.5" y2="5" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
-    <line x1="5.5" y1="3" x2="4.5" y2="5" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
-    <line x1="8.5" y1="3" x2="9.5" y2="5" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
-  </svg>`
-};
 
 /**
  * Render the interactive action plan.
@@ -39,7 +16,7 @@ const CATEGORY_ICONS = {
 export function renderActionPlan() {
   const state = Store.getState();
   const relevantActions = Store.getRelevantActions();
-  const { checkedActions, totalSavings, projectedScore, emissions } = state;
+  const { checkedActions, projectedScore } = state;
 
   const section = document.createElement('section');
   section.className = 'action-plan section';

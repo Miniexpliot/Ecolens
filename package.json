@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "vite",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest run --coverage"
   },
   "repository": {
     "type": "git",
@@ -14,12 +14,17 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/Miniexpliot/Ecolens/issues"
   },
   "homepage": "https://github.com/Miniexpliot/Ecolens#readme",
   "devDependencies": {
-    "vite": "^8.0.16"
+    "@eslint/js": "^10.0.1",
+    "@vitest/coverage-v8": "^4.1.8",
+    "eslint": "^10.4.1",
+    "jsdom": "^29.1.1",
+    "vite": "^8.0.16",
+    "vitest": "^4.1.8"
   }
 }

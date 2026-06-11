@@ -6,7 +6,7 @@
 
 import { Store } from '../state.js';
 import { NATIONAL_AVERAGES } from '../constants.js';
-import { sanitizeNumber, sanitizeText, createSafeSelect, createSafeRangeInput, createRadioCards, validateInputs } from '../sanitize.js';
+import { sanitizeNumber, createSafeRangeInput, createRadioCards, validateInputs } from '../sanitize.js';
 import { navigate } from '../router.js';
 
 /* ── Step definitions ────────────────────────────────────────── */
@@ -687,7 +687,9 @@ function buildNavButtons(step) {
           errorBanner.style.background = 'rgba(239, 68, 68, 0.15)';
           errorBanner.style.border = '1px solid #ef4444';
           errorBanner.style.borderRadius = 'var(--radius-sm)';
-          panel.insertBefore(errorBanner, panel.firstChild);
+          if (nav.parentNode) {
+            nav.parentNode.insertBefore(errorBanner, nav);
+          }
         }
         errorBanner.innerHTML = '<strong>Error:</strong> No values found. Please provide valid inputs before calculating.';
         return;

@@ -412,8 +412,32 @@ export function renderDonutChart(containerId, segments) {
     item.appendChild(text);
     legend.appendChild(item);
   });
-
+  
   container.appendChild(legend);
+
+  // ── Accessible Data Table Fallback ────────────────────────────────────
+  const table = document.createElement('table');
+  table.className = 'sr-only';
+  table.innerHTML = `
+    <caption>Carbon Emissions Breakdown</caption>
+    <thead>
+      <tr>
+        <th scope="col">Category</th>
+        <th scope="col">Emissions (tons CO₂e)</th>
+        <th scope="col">Percentage</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${validSegments.map(s => `
+        <tr>
+          <td>${s.label}</td>
+          <td>${s.value.toFixed(2)}</td>
+          <td>${((s.value / total) * 100).toFixed(1)}%</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
+  container.appendChild(table);
 }
 
 // ---------------------------------------------------------------------------
@@ -641,6 +665,28 @@ export function renderBarChart(containerId, bars) {
     );
   });
   svg.addEventListener('mouseleave', () => tooltip.hide());
+
+  // ── Accessible Data Table Fallback ────────────────────────────────────
+  const table = document.createElement('table');
+  table.className = 'sr-only';
+  table.innerHTML = `
+    <caption>Emissions Comparison</caption>
+    <thead>
+      <tr>
+        <th scope="col">Category</th>
+        <th scope="col">Emissions (tons CO₂e)</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${bars.map(b => `
+        <tr>
+          <td>${b.label}</td>
+          <td>${b.value.toFixed(2)}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
+  container.appendChild(table);
 }
 
 // ---------------------------------------------------------------------------
@@ -861,6 +907,34 @@ export function renderComparisonGauge(containerId, userValue, nationalAvg, safeT
   svg.appendChild(scaleEnd);
 
   container.appendChild(svg);
+
+  // ── Accessible Data Table Fallback ────────────────────────────────────
+  const table = document.createElement('table');
+  table.className = 'sr-only';
+  table.innerHTML = `
+    <caption>Your Footprint vs Benchmarks</caption>
+    <thead>
+      <tr>
+        <th scope="col">Metric</th>
+        <th scope="col">Emissions (tons CO₂e)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Your Footprint</td>
+        <td>${userValue.toFixed(2)}</td>
+      </tr>
+      <tr>
+        <td>Safe Target</td>
+        <td>${safeTarget.toFixed(2)}</td>
+      </tr>
+      <tr>
+        <td>National Average</td>
+        <td>${nationalAvg.toFixed(2)}</td>
+      </tr>
+    </tbody>
+  `;
+  container.appendChild(table);
 }
 
 /**

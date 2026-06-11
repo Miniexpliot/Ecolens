@@ -22,3 +22,7 @@ Thumbs.db
 .vscode/
 *.suo
 *.user
+
+# Temporary files
+scratch/
+coverage/

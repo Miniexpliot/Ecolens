@@ -7,7 +7,7 @@
 import { Store } from '../state.js';
 import { SAFE_TARGET, CATEGORY_COLORS, CATEGORY_LABELS } from '../constants.js';
 import { generateReport } from '../ai-engine.js';
-import { renderDonutChart, renderBarChart, renderComparisonGauge } from '../charts.js';
+import { renderBarChart, renderComparisonGauge } from '../charts.js';
 
 /**
  * Render the full results / report section.
@@ -176,7 +176,7 @@ function buildEmissionsBreakdown(emissions, percentages) {
 
 /* ── Comparison Section ──────────────────────────────────────── */
 
-function buildComparisonSection(report, emissions) {
+function buildComparisonSection(report, _emissions) {
   const card = document.createElement('div');
   card.className = 'glass-card glass-card--static';
   card.setAttribute('role', 'region');
@@ -305,7 +305,7 @@ function renderEmissionsDonut(emissions, percentages) {
   }
 }
 
-function renderComparisonGaugeChart(emissions, inputs) {
+function renderComparisonGaugeChart(emissions, _inputs) {
   const nationalAvg = Store.getNationalAverage();
 
   try {
