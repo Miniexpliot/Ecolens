@@ -8,20 +8,17 @@
   <meta name="color-scheme" content="dark">
 
   <!--
-    Content Security Policy:
-    - default-src 'self'          → only our own origin for default resource loads
-    - script-src 'self' + CDN    → Three.js loaded from trusted CDN; unsafe-eval
-                                    only present because Vite dev HMR requires it;
-                                    remove 'unsafe-eval' for production builds.
-    - style-src 'unsafe-inline'  → Required for Vite injected critical styles
-    - connect-src ws: wss:       → Vite HMR websocket
-    - font-src                   → Google Fonts static assets
-    - img-src data:              → Base64 data URIs used by chart SVGs
+    Content Security Policy (production):
+    - default-src 'self'        → only our own origin for default resource loads
+    - script-src 'self' + CDN   → Three.js loaded from trusted CDN
+    - style-src 'unsafe-inline' → required for inline critical styles and Vite
+    - font-src                  → Google Fonts static assets
+    - img-src data:             → base64 data URIs used by chart SVGs
   -->
   <meta http-equiv="Content-Security-Policy"
         content="default-src 'self';
-                 script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com;
-                 connect-src 'self' ws: wss:;
+                 script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
+                 connect-src 'self';
                  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
                  font-src 'self' https://fonts.gstatic.com;
                  img-src 'self' data:;">

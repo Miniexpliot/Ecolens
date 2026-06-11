@@ -7,7 +7,11 @@
 
 import {Store} from '../state.js';
 import {CATEGORY_COLORS, CATEGORY_LABELS} from '../constants.js';
-import {groupByCategory, buildActionCard} from '../helpers/actionPlanHelpers.js';
+import {
+  groupByCategory,
+  calculateMetrics,
+  buildActionCard,
+} from '../helpers/actionPlanHelpers.js';
 
 /**
  * Render the interactive action plan.
@@ -16,7 +20,11 @@ import {groupByCategory, buildActionCard} from '../helpers/actionPlanHelpers.js'
 export function renderActionPlan() {
   const state = Store.getState();
   const relevantActions = Store.getRelevantActions();
-  const { checkedActions, projectedScore } = state;
+  const { checkedActions } = state;
+
+  // Memoized metrics from helper module
+  const { totalPotential, projectedScore, checkedCount } =
+    calculateMetrics(relevantActions);
 
   const section = document.createElement('section');
   section.className = 'action-plan section';
@@ -35,10 +43,6 @@ export function renderActionPlan() {
   container.appendChild(header);
 
   // Summary metrics
-  const totalPotential = relevantActions.reduce(
-    (sum, a) => sum + (a.savingsTons || 0),
-    0
-  );
   const metrics = document.createElement('div');
   metrics.className = 'action-plan__metrics';
   metrics.setAttribute('data-action-metrics', 'true');
@@ -53,7 +57,7 @@ export function renderActionPlan() {
       <div class="action-plan__metric-label">Projected Score (tons)</div>
     </div>
     <div class="action-plan__metric">
-      <div class="action-plan__metric-value" data-count>${checkedActions.size}</div>
+      <div class="action-plan__metric-value" data-count>${checkedCount}</div>
       <div class="action-plan__metric-label">Actions Taken</div>
     </div>
   `;

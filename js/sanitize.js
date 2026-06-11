@@ -301,13 +301,19 @@ export function createSafeRangeInput(config) {
   input.step = config.step || 1;
   input.value = config.defaultValue;
   input.setAttribute('aria-label', config.label);
+  input.setAttribute(
+    'aria-valuetext',
+    `${config.defaultValue} ${config.unit || ''}`
+  );
   if (config.ariaDescribedBy) {
     input.setAttribute('aria-describedby', config.ariaDescribedBy);
   }
 
   // Update visual value on drag
   input.addEventListener('input', () => {
-    valueDisplay.textContent = `${input.value} ${config.unit || ''}`;
+    const text = `${input.value} ${config.unit || ''}`;
+    valueDisplay.textContent = text;
+    input.setAttribute('aria-valuetext', text);
   });
 
   if (config.onChange) {

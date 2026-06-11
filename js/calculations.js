@@ -16,6 +16,18 @@
 
 import { EMISSION_FACTORS } from './constants.js';
 
+/**
+ * Baseline emissions (tons CO₂e/yr) assumed by action-item authors.
+ * Used to scale savings relative to the user's actual emissions.
+ * @type {Readonly<Record<string, number>>}
+ */
+const BASELINE_CATEGORY_TONS = Object.freeze({
+  travel: 4.0,
+  home: 2.0,
+  diet: 3.0,
+  shopping: 0.5,
+});
+
 // ---------------------------------------------------------------------------
 // Type aliases (JSDoc-only — aids editor tooling)
 // ---------------------------------------------------------------------------
@@ -298,14 +310,6 @@ export function calculateAllEmissions(inputs) {
  * @returns {number} Adjusted annual savings in tons CO₂e (rounded to 2 dp)
  */
 export function calculateActionSavings(actionItem, emissions) {
-  /** @type {Record<string, number>} Baseline emissions assumed by action-item authors */
-  const BASELINE_CATEGORY_TONS = Object.freeze({
-    travel: 4.0,
-    home: 2.0,
-    diet: 3.0,
-    shopping: 0.5,
-  });
-
   const categoryEmissions = emissions[actionItem.category] ?? 0;
   const baseline = BASELINE_CATEGORY_TONS[actionItem.category] ?? 1;
 

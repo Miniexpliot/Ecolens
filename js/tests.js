@@ -1,14 +1,16 @@
 /**
- * @fileoverview Comprehensive Unit Test Suite — EcoLens
+ * @fileoverview In-Browser Unit Test Suite for the Debug Panel.
  *
- * Covers all pure functions in `calculations.js`, `sanitize.js`, and
- * the `TestRunner` harness itself.
+ * This module is loaded dynamically by `debug-panel.js` when the user clicks
+ * "Run Tests" in the on-page debug panel (Ctrl+Shift+D). It runs entirely
+ * in the browser without build tools, complementing the Vitest-based CI
+ * test suites in `*.test.js` files.
  *
  * Test categories:
- *   1. Happy-path   – Typical valid inputs produce expected outputs.
- *   2. Edge-cases   – Boundaries, zeros, extreme values, empty objects.
- *   3. Failure-path – Null inputs, invalid types, out-of-range values.
- *   4. Security     – XSS payloads, injection strings, oversized inputs.
+ *   1. Happy-path   — Typical valid inputs produce expected outputs.
+ *   2. Edge-cases   — Boundaries, zeros, extreme values, empty objects.
+ *   3. Failure-path — Null inputs, invalid types, out-of-range values.
+ *   4. Security     — XSS payloads, injection strings, oversized inputs.
  *
  * @module tests
  */
