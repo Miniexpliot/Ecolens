@@ -164,13 +164,28 @@ describe('Local AI Report Engine', () => {
       expect(res).toContain('Replacing your gas car');
     });
 
-    test('handles simulated errors cleanly', async () => {
-      const state = { reportGenerated: true };
-      const resTimeout = await chatRespond('simulate timeout', state);
-      expect(resTimeout).toContain('Network Error');
+    test('returns fallback response for unrecognized queries', async () => {
+      const state = {
+        reportGenerated: true,
+        emissions: {
+          travel: 5.0,
+          home: 1.0,
+          diet: 1.0,
+          shopping: 1.0,
+          total: 8.0,
+        },
+        inputs: {
+          country: 'United States',
+          travel: { carType: 'gas' },
+          home: {},
+          diet: {},
+          shopping: {},
+        },
+      };
 
-      const resHtml = await chatRespond('simulate html error', state);
-      expect(resHtml).toContain('Parsing Error');
+      const res = await chatRespond('xyzzy gibberish', state);
+      expect(res).toContain('8.0');
+      expect(res).toContain('travel');
     });
   });
 });

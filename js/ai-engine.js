@@ -272,22 +272,7 @@ function _findHighestCategory(emissions) {
   );
 }
 
-/**
- * Simulated HTTP fetch to demonstrate robust error handling for timeouts and missing HTML tags.
- */
-async function simulateHttpFetch(query) {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      if (query.includes('simulate timeout')) {
-        reject(new Error('Timeout'));
-      } else if (query.includes('simulate html error')) {
-        reject(new Error('Missing HTML tags'));
-      } else {
-        resolve();
-      }
-    }, 300);
-  });
-}
+
 
 /**
  * Deterministic conversational tree for the Chat Widget.
@@ -314,18 +299,7 @@ export async function chatRespond(query, state) {
     return "I'd love to give you personalized advice, but you need to complete the calculator first so I can analyze your data!";
   }
 
-  // Simulate HTTP fetch with robust error handling for HTTP timeouts and missing HTML tags
-  try {
-    await simulateHttpFetch(q);
-  } catch (error) {
-    if (error.message === 'Timeout') {
-      return '⚠️ Network Error: The HTTP request timed out while connecting to the AI service. Please try again.';
-    }
-    if (error.message === 'Missing HTML tags') {
-      return '⚠️ Parsing Error: The response was missing expected HTML tags. The layout could not be parsed.';
-    }
-    return `⚠️ Error: ${error.message}`;
-  }
+
 
   const e = state.emissions;
   const i = state.inputs;
@@ -420,7 +394,7 @@ export async function chatRespond(query, state) {
   }
 
   if (q.includes('hello') || q.includes('hi ') || q.includes('hey')) {
-    return `Hi there! I'm analyzing your ${e.total.toFixed(1)} ton footprint. Ask me about your diet, travel, or home energy! You can also type 'simulate timeout' or 'simulate html error' to test robust error handling.`;
+    return `Hi there! I'm analyzing your ${e.total.toFixed(1)} ton footprint. Ask me about your diet, travel, or home energy for personalized insights!`;
   }
 
   // Fallback

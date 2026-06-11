@@ -1,4 +1,3 @@
-// js/helpers/accessibility.js
 /**
  * @fileoverview Small utilities to make DOM elements keyboard‑focusable and
  * trigger a callback when the user activates them via Enter or Space.

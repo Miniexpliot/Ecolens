@@ -2487,8 +2487,12 @@ input[type="range"] {
   height: 6px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-pill);
-  outline: none;
   margin: var(--space-sm) 0;
+}
+
+input[type="range"]:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 input[type="range"]::-webkit-slider-thumb {

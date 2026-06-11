@@ -83,7 +83,7 @@
  * @property {number} totalSavings
  * @property {number} projectedScore
  * @property {boolean} reportGenerated
- * @property {string[]} unlockedBadges
+ * @property {Array<{id: string, name: string, icon: string, description: string}>} unlockedBadges
  */
 
 /**

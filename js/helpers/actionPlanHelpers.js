@@ -1,14 +1,13 @@
-// js/helpers/actionPlanHelpers.js
 /**
  * @fileoverview Helper functions for the Action Plan component.
  * Provides memoized utilities for metric calculation, category grouping,
  * and accessible action‑card rendering.
  */
 
-import { Store } from "../state.js";
-import { CATEGORY_COLORS, CATEGORY_LABELS } from "../constants.js";
-import { sanitizeSafeHTML } from "../sanitize.js";
-import { makeFocusable } from "./accessibility.js";
+import { Store } from '../state.js';
+import { CATEGORY_COLORS, CATEGORY_LABELS } from '../constants.js';
+import { sanitizeSafeHTML } from '../sanitize.js';
+import { makeFocusable } from './accessibility.js';
 
 // Simple memoization cache per render cycle
 let _groupCache = null;
@@ -25,7 +24,7 @@ export function groupByCategory(actions) {
   }
   const groups = {};
   actions.forEach((action) => {
-    const cat = action.category || "other";
+    const cat = action.category || 'other';
     if (!groups[cat]) groups[cat] = [];
     groups[cat].push(action);
   });
@@ -42,16 +41,13 @@ export function calculateMetrics(actions) {
   if (_metricsCache && _metricsCache.actions === actions) {
     return _metricsCache.result;
   }
-  const totalPotential = actions.reduce(
-    (sum, a) => sum + (a.savingsTons || 0),
-    0
-  );
+  const totalPotential = actions.reduce((sum, a) => sum + (a.savingsTons || 0), 0);
   const state = Store.getState();
   const { projectedScore, checkedActions } = state;
   const result = {
     totalPotential,
     projectedScore,
-    checkedCount: checkedActions.size,
+    checkedCount: checkedActions.size
   };
   _metricsCache = { actions, result };
   return result;
@@ -64,17 +60,17 @@ export function calculateMetrics(actions) {
  * @returns {HTMLElement}
  */
 export function buildActionCard(action, isChecked) {
-  const card = document.createElement("div");
-  card.className = `action-item${isChecked ? " action-item--checked" : ""}`;
-  card.setAttribute("role", "listitem");
+  const card = document.createElement('div');
+  card.className = `action-item${isChecked ? ' action-item--checked' : ''}`;
+  card.setAttribute('role', 'listitem');
   // ARIA state for screen readers
-  card.setAttribute("aria-checked", isChecked ? "true" : "false");
+  card.setAttribute('aria-checked', isChecked ? 'true' : 'false');
 
   const checkboxId = `action-${action.id}`;
 
   card.innerHTML = `
     <label class="action-item__checkbox" for="${checkboxId}">
-      <input type="checkbox" id="${checkboxId}" ${isChecked ? "checked" : ""} aria-label="${escapeAttr(action.title)}" />
+      <input type="checkbox" id="${checkboxId}" ${isChecked ? 'checked' : ''} aria-label="${escapeAttr(action.title)}" />
       <div class="action-item__checkbox-visual" aria-hidden="true">
         <svg viewBox="0 0 14 14" fill="none">
           <polyline points="2.5,7 6,10.5 11.5,3.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -91,14 +87,14 @@ export function buildActionCard(action, isChecked) {
   `;
 
   const checkbox = card.querySelector(`#${checkboxId}`);
-  checkbox.addEventListener("change", () => {
+  checkbox.addEventListener('change', () => {
     Store.toggleAction(action.id);
-    card.classList.toggle("action-item--checked", checkbox.checked);
-    card.setAttribute("aria-checked", checkbox.checked ? "true" : "false");
+    card.classList.toggle('action-item--checked', checkbox.checked);
+    card.setAttribute('aria-checked', checkbox.checked ? 'true' : 'false');
   });
 
   // Click on card toggles checkbox (excluding the checkbox itself)
-  card.addEventListener("click", (e) => {
+  card.addEventListener('click', (e) => {
     if (e.target !== checkbox && !e.target.closest('.action-item__checkbox')) {
       checkbox.checked = !checkbox.checked;
       checkbox.dispatchEvent(new Event('change'));
@@ -120,11 +116,11 @@ export function buildActionCard(action, isChecked) {
  * @returns {string}
  */
 function escapeAttr(str) {
-  if (!str) return "";
+  if (!str) return '';
   return str
-    .replace(/&/g, "&amp;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }
