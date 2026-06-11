@@ -247,6 +247,18 @@ export function generateWelcomeMessage() {
 // ---------------------------------------------------------------------------
 
 /**
+ * Find the emission category with the highest value, excluding 'total'.
+ * Returns 'travel' as a safe fallback if no valid categories exist.
+ * @param {Object} emissions - Emissions object with category keys and numeric values.
+ * @returns {string} The key of the highest-emitting category.
+ */
+function _findHighestCategory(emissions) {
+  const categories = Object.keys(emissions).filter(k => k !== 'total');
+  if (categories.length === 0) return 'travel';
+  return categories.reduce((a, b) => emissions[a] > emissions[b] ? a : b, categories[0]);
+}
+
+/**
  * Simulated HTTP fetch to demonstrate robust error handling for timeouts and missing HTML tags.
  */
 async function simulateHttpFetch(query) {
@@ -362,7 +374,7 @@ export async function chatRespond(query, state) {
   }
 
   if (q.includes('reduce') || q.includes('improve') || q.includes('help') || q.includes('advice')) {
-    const highest = Object.keys(e).filter(k => k !== 'total').reduce((a, b) => e[a] > e[b] ? a : b);
+    const highest = _findHighestCategory(e);
     return `Your highest emission category is **${highest}** (${e[highest].toFixed(1)} tons, which is **${p[highest]}%** of your total). Check your Action Plan for specific ways to target this area!`;
   }
 
@@ -371,6 +383,7 @@ export async function chatRespond(query, state) {
   }
 
   // Fallback
-  return `That's an interesting question! Based on your footprint of ${e.total.toFixed(1)} tons, your biggest opportunity for improvement is in the **${Object.keys(e).filter(k => k !== 'total').reduce((a, b) => e[a] > e[b] ? a : b)}** category. Let me know if you want to dive into that!`;
+  const fallbackHighest = _findHighestCategory(e);
+  return `That's an interesting question! Based on your footprint of ${e.total.toFixed(1)} tons, your biggest opportunity for improvement is in the **${fallbackHighest}** category. Let me know if you want to dive into that!`;
 }
 

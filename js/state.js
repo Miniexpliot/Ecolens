@@ -52,20 +52,51 @@ const defaultState = {
   unlockedBadges: []
 };
 
+/**
+ * Load persisted state from localStorage, deep-merging saved inputs
+ * over defaults so missing categories keep their default values.
+ * @returns {Object} The merged application state.
+ */
 function loadState() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (parsed.checkedActions) {
-        parsed.checkedActions = new Set(parsed.checkedActions);
+
+      // Restore Set (JSON.stringify converts Set → Array)
+      parsed.checkedActions = new Set(parsed.checkedActions || []);
+
+      // Deep-merge each input category so partial saves don't lose defaults
+      const mergedInputs = { ...defaultState.inputs };
+      if (parsed.inputs && typeof parsed.inputs === 'object') {
+        Object.keys(mergedInputs).forEach(category => {
+          if (parsed.inputs[category] && typeof parsed.inputs[category] === 'object') {
+            mergedInputs[category] = { ...mergedInputs[category], ...parsed.inputs[category] };
+          }
+        });
       }
-      return { ...defaultState, ...parsed };
+
+      return {
+        ...defaultState,
+        ...parsed,
+        inputs: mergedInputs,
+        checkedActions: parsed.checkedActions,
+        unlockedBadges: Array.isArray(parsed.unlockedBadges)
+          ? parsed.unlockedBadges
+          : [...defaultState.unlockedBadges]
+      };
     }
   } catch (e) {
     console.warn('Failed to load state from local storage', e);
   }
-  return JSON.parse(JSON.stringify(defaultState));
+
+  // Cold start: clone defaults manually to avoid JSON.stringify destroying the Set
+  return {
+    ...defaultState,
+    inputs: JSON.parse(JSON.stringify(defaultState.inputs)),
+    checkedActions: new Set(defaultState.checkedActions),
+    unlockedBadges: [...defaultState.unlockedBadges]
+  };
 }
 
 function saveState() {
@@ -198,16 +229,19 @@ export const Store = {
    * @param {Object} partial – Fields to merge into state
    */
   setState(partial) {
+    // Copy to avoid mutating the caller's object
+    const updates = { ...partial };
+
     // Deep merge inputs if provided
-    if (partial.inputs) {
-      Object.keys(partial.inputs).forEach(category => {
+    if (updates.inputs) {
+      Object.keys(updates.inputs).forEach(category => {
         if (_state.inputs[category] && typeof _state.inputs[category] === 'object') {
-          _state.inputs[category] = { ..._state.inputs[category], ...partial.inputs[category] };
+          _state.inputs[category] = { ..._state.inputs[category], ...updates.inputs[category] };
         } else {
-          _state.inputs[category] = partial.inputs[category];
+          _state.inputs[category] = updates.inputs[category];
         }
       });
-      delete partial.inputs;
+      delete updates.inputs;
     }
 
     // Apply other state changes

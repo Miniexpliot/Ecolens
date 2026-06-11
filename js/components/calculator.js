@@ -281,6 +281,7 @@ function renderStep2(panel, inputs) {
         { value: 'none', text: 'Off/NA', icon: '🚫' }
       ],
       defaultValue: inputs.home?.heatingCooling || 'moderate',
+      onChange: (val) => updateInput('heatingCooling', val)
     })
   ));
 
@@ -296,6 +297,7 @@ function renderStep2(panel, inputs) {
         { value: 'alwaysUnplug', text: 'Always', icon: '✅' }
       ],
       defaultValue: inputs.home?.unplugAppliances || 'sometimesUnplug',
+      onChange: (val) => updateInput('unplugAppliances', val)
     })
   ));
 

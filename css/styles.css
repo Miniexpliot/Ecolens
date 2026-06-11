@@ -3,8 +3,10 @@
    Production CSS Stylesheet
    ============================================================ */
 
-/* --- Google Fonts Import --- */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700;800&display=swap');
+/* --- Google Fonts ---
+   Loaded via <link> in index.html for non-blocking preconnect.
+   Do NOT add @import here — it is render-blocking.
+   ------------------------------------------------------------ */
 
 /* ============================================================
    1. CSS CUSTOM PROPERTIES (Design Tokens)

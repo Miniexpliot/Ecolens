@@ -84,7 +84,7 @@ export function renderDebugPanel() {
     output.textContent = 'Running tests…';
 
     try {
-      const testModule = await import('../test.js');
+      const testModule = await import('../tests.js');
       if (typeof testModule.runAllTests === 'function') {
         const results = await testModule.runAllTests();
         if (results) {
@@ -99,13 +99,12 @@ export function renderDebugPanel() {
               }
             });
           }
-          output.innerHTML = '';
           output.textContent = resultText;
         } else {
           output.textContent = 'Tests completed (no structured results returned).';
         }
       } else {
-        output.textContent = 'Error: test.js does not export runAllTests()';
+        output.textContent = 'Error: tests.js does not export runAllTests()';
       }
     } catch (err) {
       output.textContent = `Error loading tests: ${err.message}`;

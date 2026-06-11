@@ -4,8 +4,6 @@
  * skip navigation link, and accessible ARIA attributes.
  */
 
-import { navigate } from '../router.js';
-
 /**
  * Render the main navigation bar.
  * @returns {HTMLElement} The navbar element.

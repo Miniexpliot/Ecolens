@@ -6,9 +6,8 @@
 
 import { Store } from '../state.js';
 import { SAFE_TARGET, CATEGORY_COLORS, CATEGORY_LABELS } from '../constants.js';
-import { generateReport, generateWelcomeMessage } from '../ai-engine.js';
-import { calculatePercentages } from '../calculations.js';
-import { renderDonutChart, renderComparisonGauge } from '../charts.js';
+import { generateReport } from '../ai-engine.js';
+import { renderDonutChart, renderBarChart, renderComparisonGauge } from '../charts.js';
 
 /**
  * Render the full results / report section.
@@ -113,7 +112,7 @@ function buildAIPanel(report) {
       </div>
     </div>
 
-    <div class="ai-panel__summary">${report.summary || ''}</div>
+    <div class="ai-panel__summary">${escapeHTML(report.summary || '')}</div>
 
     ${insightsHTML ? `
       <h4 style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 0.05em;">Key Insights</h4>
@@ -123,7 +122,7 @@ function buildAIPanel(report) {
     ${report.savingsText ? `
       <div class="glass-card" style="margin-top: var(--space-md); background: rgba(16,185,129,0.05); border-color: rgba(16,185,129,0.15);">
         <h4 style="color: var(--color-primary); font-size: 0.9rem; margin-bottom: var(--space-sm);">💰 Savings Potential</h4>
-        <p style="font-size: 0.9rem; line-height: 1.6;">${report.savingsText}</p>
+        <p style="font-size: 0.9rem; line-height: 1.6;">${escapeHTML(report.savingsText)}</p>
       </div>
     ` : ''}
   `;
