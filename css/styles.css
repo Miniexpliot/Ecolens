@@ -164,11 +164,12 @@ table {
   border-collapse: collapse;
 }
 
-/* Remove default focus styles, apply custom */
-:focus {
-  outline: none;
-}
-
+/*
+ * Focus management:
+ * 1. Apply custom focus ring on :focus-visible (modern browsers).
+ * 2. Fallback: older browsers still show the browser-default outline
+ *    because we only suppress it inside the :focus-visible rule.
+ */
 :focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);

@@ -28,6 +28,15 @@
 
   <title>EcoLens — Personal Carbon Footprint Tracker</title>
 
+  <!-- Open Graph / Social -->
+  <meta property="og:title" content="EcoLens — Personal Carbon Footprint Tracker">
+  <meta property="og:description" content="Understand, track, and reduce your carbon footprint with personalized AI-powered insights.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌍</text></svg>">
+
   <!-- Google Fonts — preconnect to eliminate render-blocking round trips -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -87,7 +96,7 @@
       text-align: center;
       padding: 20px;
       font-size: 0.85rem;
-      color: rgba(255, 255, 255, 0.4);
+      color: rgba(255, 255, 255, 0.7);
       background: rgba(0, 0, 0, 0.2);
       border-top: 1px solid rgba(255, 255, 255, 0.05);
       backdrop-filter: blur(5px);
@@ -103,6 +112,14 @@
     users can bypass the navigation bar directly to main content (WCAG 2.4.1 AA).
   -->
   <a href="#main-content" class="skip-nav">Skip to main content</a>
+
+  <!-- Fallback for users with JavaScript disabled -->
+  <noscript>
+    <div style="text-align:center;padding:3rem;color:#f1f5f9;font-family:Inter,sans-serif;">
+      <h1>EcoLens requires JavaScript</h1>
+      <p>Please enable JavaScript in your browser to use this application.</p>
+    </div>
+  </noscript>
 
   <!--
     3D background canvas — decorative only. aria-hidden prevents assistive

@@ -1,9 +1,5 @@
 /**
- * @fileoverview EcoLens application module: report.js
- * Follows strict Google JavaScript Style Guide.
- */
-/**
- * EcoLens — Report / Results Component
+ * @fileoverview EcoLens Report / Results Component.
  * Displays the AI-generated report, emissions breakdown with charts,
  * comparison gauge, and a live-updating projected score.
  */
@@ -13,6 +9,25 @@ import { SAFE_TARGET, CATEGORY_COLORS, CATEGORY_LABELS } from '../constants.js';
 import { generateReport } from '../ai-engine.js';
 import { renderBarChart, renderComparisonGauge } from '../charts.js';
 import { sanitizeSafeHTML } from '../sanitize.js';
+
+/**
+ * Shared category definitions used by both the breakdown and chart helpers.
+ * @type {Array<{key: string, label: string, color: string}>}
+ */
+const CATEGORIES = [
+  {
+    key: 'travel',
+    label: CATEGORY_LABELS.travel,
+    color: CATEGORY_COLORS.travel,
+  },
+  { key: 'home', label: CATEGORY_LABELS.home, color: CATEGORY_COLORS.home },
+  { key: 'diet', label: CATEGORY_LABELS.diet, color: CATEGORY_COLORS.diet },
+  {
+    key: 'shopping',
+    label: CATEGORY_LABELS.shopping,
+    color: CATEGORY_COLORS.shopping,
+  },
+];
 
 /**
  * Render the full results / report section.
@@ -60,7 +75,7 @@ export function renderReport() {
   grid.appendChild(buildEmissionsBreakdown(emissions, percentages));
 
   // ─── 3. Comparison Section ─────────────────────────────────
-  grid.appendChild(buildComparisonSection(report, emissions));
+  grid.appendChild(buildComparisonSection(report));
 
   // ─── 4. Projected Score ────────────────────────────────────
   grid.appendChild(
@@ -78,7 +93,7 @@ export function renderReport() {
   // Render charts after the section is in the DOM
   requestAnimationFrame(() => {
     renderEmissionsDonut(emissions, percentages);
-    renderComparisonGaugeChart(emissions, inputs);
+    renderComparisonGaugeChart(emissions);
   });
 
   return section;
@@ -117,7 +132,7 @@ function buildAIPanel(report) {
       </div>
       <div class="ai-panel__header-rating">
         <span class="rating-badge rating-badge--${report.ratingClass || 'average'}">
-          ${report.ratingEmoji || '📊'} ${escapeHTML(report.rating || 'Average')}
+          ${report.ratingEmoji || '📊'} ${sanitizeSafeHTML(report.rating || 'Average')}
         </span>
       </div>
     </div>
@@ -156,22 +171,7 @@ function buildEmissionsBreakdown(emissions, percentages) {
   card.setAttribute('role', 'region');
   card.setAttribute('aria-label', 'Emissions breakdown by category');
 
-  const categories = [
-    {
-      key: 'travel',
-      label: CATEGORY_LABELS.travel,
-      color: CATEGORY_COLORS.travel,
-    },
-    { key: 'home', label: CATEGORY_LABELS.home, color: CATEGORY_COLORS.home },
-    { key: 'diet', label: CATEGORY_LABELS.diet, color: CATEGORY_COLORS.diet },
-    {
-      key: 'shopping',
-      label: CATEGORY_LABELS.shopping,
-      color: CATEGORY_COLORS.shopping,
-    },
-  ];
-
-  const legendItems = categories
+  const legendItems = CATEGORIES
     .map(
       (cat) => `
     <div class="emissions-legend__item">
@@ -206,7 +206,12 @@ function buildEmissionsBreakdown(emissions, percentages) {
 
 /* ── Comparison Section ──────────────────────────────────────── */
 
-function buildComparisonSection(report, _emissions) {
+/**
+ * Build the comparison section card.
+ * @param {Object} report - AI-generated report data.
+ * @returns {HTMLElement}
+ */
+function buildComparisonSection(report) {
   const card = document.createElement('div');
   card.className = 'glass-card glass-card--static';
   card.setAttribute('role', 'region');
@@ -335,23 +340,13 @@ function buildBadgesSection(badges) {
 
 /* ── Chart Rendering Helpers ─────────────────────────────────── */
 
+/**
+ * Render the emissions bar chart into its container.
+ * @param {Object} emissions - Emissions data by category.
+ * @param {Object} percentages - Percentage breakdown by category.
+ */
 function renderEmissionsDonut(emissions, percentages) {
-  const categories = [
-    {
-      key: 'travel',
-      label: CATEGORY_LABELS.travel,
-      color: CATEGORY_COLORS.travel,
-    },
-    { key: 'home', label: CATEGORY_LABELS.home, color: CATEGORY_COLORS.home },
-    { key: 'diet', label: CATEGORY_LABELS.diet, color: CATEGORY_COLORS.diet },
-    {
-      key: 'shopping',
-      label: CATEGORY_LABELS.shopping,
-      color: CATEGORY_COLORS.shopping,
-    },
-  ];
-
-  const segments = categories.map((cat) => ({
+  const segments = CATEGORIES.map((cat) => ({
     label: cat.label,
     value: emissions[cat.key] || 0,
     color: cat.color,
@@ -365,7 +360,11 @@ function renderEmissionsDonut(emissions, percentages) {
   }
 }
 
-function renderComparisonGaugeChart(emissions, _inputs) {
+/**
+ * Render the comparison gauge into its container.
+ * @param {Object} emissions - Emissions data.
+ */
+function renderComparisonGaugeChart(emissions) {
   const nationalAvg = Store.getNationalAverage();
 
   try {
@@ -378,18 +377,4 @@ function renderComparisonGaugeChart(emissions, _inputs) {
   } catch (e) {
     console.warn('Could not render comparison gauge:', e);
   }
-}
-
-/* ── Utility ─────────────────────────────────────────────────── */
-
-/**
- * Safely escapes HTML entities to prevent XSS.
- * @param {string} str - Raw input string
- * @returns {string} Escaped HTML string
- */
-function escapeHTML(str) {
-  if (!str) return '';
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
 }

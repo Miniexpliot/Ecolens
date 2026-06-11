@@ -47,7 +47,7 @@ export function renderStep2(inputs) {
           { value: 'none', text: 'Off/NA', icon: '🚫' },
         ],
         defaultValue: inputs.home?.heatingCooling || 'moderate',
-        onChange: (val) => updateInput('heatingCooling', val),
+        onChange: (val) => updateInput('heatingUsage', val),
       })
     )
   );
@@ -64,7 +64,7 @@ export function renderStep2(inputs) {
           { value: 'alwaysUnplug', text: 'Always', icon: '✅' },
         ],
         defaultValue: inputs.home?.unplugAppliances || 'sometimesUnplug',
-        onChange: (val) => updateInput('unplugAppliances', val),
+        onChange: (val) => updateInput('unplugHabit', val),
       })
     )
   );
